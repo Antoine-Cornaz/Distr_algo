@@ -18,17 +18,20 @@ public class Udp_sender {
     public Udp_sender() {
         try {
             socket = new DatagramSocket();
-            address = InetAddress.getByName("localhost");
-        } catch (SocketException | UnknownHostException e) {
+            //address = InetAddress.getByName("localhost");
+        } catch (SocketException  e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String sendEcho(String msg) {
-        buf = msg.getBytes();
-        DatagramPacket packet
-                = new DatagramPacket(buf, buf.length, address, 5555);
+    public String sendEcho(String msg, String ip, int port) {
+        System.out.println("send echo msg " + msg + " ip " + ip + " port " + port);
         try {
+            buf = msg.getBytes();
+            address = InetAddress.getByName(ip);
+            DatagramPacket packet
+                = new DatagramPacket(buf, buf.length, address, port);
+
             socket.send(packet);
             System.out.println("udp_sender: message sended " + msg);
             //socket.receive(packet);

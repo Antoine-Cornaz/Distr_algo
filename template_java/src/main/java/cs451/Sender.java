@@ -6,6 +6,7 @@ public class Sender {
     private int number_message;
     private int[] list_message_num;
 
+    // 1 addresse is id, ip and port
     private int[] list_message_id;
     private String[] list_ip;
     private int[] list_port;
@@ -39,8 +40,15 @@ public class Sender {
 
     public void send(int[] message, int number_message){
         for (int i = 0; i < number_message; i++) {
-            String message_s = String.valueOf(list_message_num[message[i]]);
-            udpSender.sendEcho(message_s);
+            int message_number = message[i];
+            String message_s = String.valueOf(list_message_num[message_number]);
+            String ip = list_ip[message_number];
+            int port = list_port[message_number];
+            udpSender.sendEcho(message_s, ip, port);
         }
+    }
+
+    public void close(){
+        udpSender.close();
     }
 }

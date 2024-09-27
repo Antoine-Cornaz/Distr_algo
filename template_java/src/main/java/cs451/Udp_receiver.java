@@ -19,9 +19,10 @@ public class Udp_receiver extends Thread {
     private byte[] buf = new byte[256];
     private byte[] buf_answer = new byte[256];
 
-    public Udp_receiver()  {
+    public Udp_receiver(int port)  {
+        System.out.println("Udp_receiver port " + port);
         try {
-            socket = new DatagramSocket(5555);
+            socket = new DatagramSocket(port);
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }

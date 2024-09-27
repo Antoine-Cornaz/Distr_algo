@@ -79,16 +79,17 @@ public class Main {
 
         String config_path = parser.config();
         int index_receive = parser.getIndexReceive();
+        List<Host> hosts = parser.hosts();
 
         if(parser.myId() == index_receive){
             // Receiver
             System.out.println("I'm the receiver\n");
-            Receiver receiver = new Receiver();
+            Host hosts_receiver = hosts.get(index_receive - 1);
+            int port = hosts_receiver.getPort();
+            Receiver receiver = new Receiver(port);
         }else{
             System.out.println("I'm a sender\n");
             int number_message = parser.getNumberMessage();
-
-            List<Host> hosts = parser.hosts();
 
 
             // Create messages and destinations
@@ -119,9 +120,9 @@ public class Main {
                     destination_ip,
                     destination_port);
 
-            int[] message2send = {0, 1, 2};
+            int[] message2send = {0, 2, 7};
             sender.send(message2send, 3);
-
+            sender.close();
 
         }
     }
