@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.List;
 
 
 public class Main {
@@ -77,12 +78,51 @@ public class Main {
     private static void initialize(Parser parser){
 
         String config_path = parser.config();
+        int index_receive = parser.getIndexReceive();
 
-        if(parser.myId() == parser.getIndexReceive()){
+        if(parser.myId() == index_receive){
             // Receiver
             System.out.println("I'm the receiver\n");
+            Receiver receiver = new Receiver();
         }else{
             System.out.println("I'm a sender\n");
+            int number_message = parser.getNumberMessage();
+
+            List<Host> hosts = parser.hosts();
+
+
+            // Create messages and destinations
+            int[] messages = new int[number_message];
+
+            int[] destination_id = new int[number_message];
+            String[] destination_ip = new String[number_message];
+            int[] destination_port = new int[number_message];
+
+            for (int i = 0; i < number_message; i++) {
+                messages[i] = i;
+                int destination_num = index_receive;
+
+                Host hosts_receiver = hosts.get(destination_num-1);
+
+                // I hop the id  is equal to the id number in the list
+                assert destination_num == hosts_receiver.getId();
+
+                destination_id[i] = hosts_receiver.getId();
+                destination_ip[i] = hosts_receiver.getIp();
+                destination_port[i] = hosts_receiver.getPort();
+            }
+
+            Sender sender = new Sender(
+                    number_message,
+                    messages,
+                    destination_id,
+                    destination_ip,
+                    destination_port);
+
+            int[] message2send = {0, 1, 2};
+            sender.send(message2send, 3);
+
+
         }
     }
 }

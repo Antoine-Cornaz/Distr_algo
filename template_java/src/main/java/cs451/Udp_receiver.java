@@ -21,13 +21,14 @@ public class Udp_receiver extends Thread {
 
     public Udp_receiver()  {
         try {
-            socket = new DatagramSocket(4445);
+            socket = new DatagramSocket(5555);
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void run() {
+        System.out.println("running \n\n");
         running = true;
 
         while (running) {

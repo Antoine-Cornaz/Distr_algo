@@ -27,10 +27,10 @@ public class Udp_sender {
     public String sendEcho(String msg) {
         buf = msg.getBytes();
         DatagramPacket packet
-                = new DatagramPacket(buf, buf.length, address, 4445);
+                = new DatagramPacket(buf, buf.length, address, 5555);
         try {
             socket.send(packet);
-            System.out.println("udp_sender: packet sended " + packet);
+            System.out.println("udp_sender: message sended " + msg);
             //socket.receive(packet);
         } catch (IOException e) {
             throw new RuntimeException(e);

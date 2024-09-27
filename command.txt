@@ -1,4 +1,9 @@
 ./run.sh --id 1 --hosts ../example/hosts --output ../example/output/1.output ../example/configs//perfect-links.config
 
+pour savoir qui utilise le port 5555
+lsof -i :5555
+
+pour kill id 8234
+killall -9 8234
 
 setxkbmap ch
