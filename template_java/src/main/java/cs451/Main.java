@@ -9,6 +9,9 @@ import java.util.List;
 
 public class Main {
 
+    static Receiver receiver;
+    static Sender sender;
+
     private static void handleSignal() {
         //immediately stop network packet processing
         System.out.println("Immediately stopping network packet processing.");
@@ -17,7 +20,13 @@ public class Main {
         System.out.println("Writing output.");
 
         //finish the program when asked to finish
-        System.exit(0);
+        if(receiver != null){
+            receiver.close();
+        }
+
+        if(sender != null){
+            sender.close();
+        }
     }
 
     private static void initSignalHandlers() {
@@ -86,7 +95,8 @@ public class Main {
             System.out.println("I'm the receiver\n");
             Host hosts_receiver = hosts.get(index_receive - 1);
             int port = hosts_receiver.getPort();
-            Receiver receiver = new Receiver(port);
+            String outputFileName = parser.output();
+            receiver = new Receiver(port, outputFileName);
         }else{
             System.out.println("I'm a sender\n");
             int number_message = parser.getNumberMessage();
@@ -113,7 +123,7 @@ public class Main {
                 destination_port[i] = hosts_receiver.getPort();
             }
 
-            Sender sender = new Sender(
+            sender = new Sender(
                     number_message,
                     messages,
                     destination_id,

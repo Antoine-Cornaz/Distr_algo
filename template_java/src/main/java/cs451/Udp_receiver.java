@@ -28,36 +28,34 @@ public class Udp_receiver extends Thread {
         }
     }
 
-    public void run() {
-        System.out.println("running \n\n");
-        running = true;
-
-        while (running) {
-            DatagramPacket packet
-                    = new DatagramPacket(buf, buf.length);
-            try {
-                socket.receive(packet);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            InetAddress address = packet.getAddress();
-            int port = packet.getPort();
-            packet = new DatagramPacket(buf, buf.length, address, port);
-            String received
-                    = new String(packet.getData(), 0, packet.getLength());
-            System.out.println("udp_receiver: received " + received);
-
-            if (received.equals("end")) {
-                running = false;
-                continue;
-            }
-            try {
-                socket.send(packet);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    public String listen_message() {
+        DatagramPacket packet
+                = new DatagramPacket(buf, buf.length);
+        try {
+            socket.receive(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+        InetAddress address = packet.getAddress();
+        int port = packet.getPort();
+        packet = new DatagramPacket(buf, buf.length, address, port);
+        String received
+                = new String(packet.getData(), 0, packet.getLength());
+        System.out.println("udp_receiver: received " + received);
+
+
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return received;
+
+    }
+
+    public void close(){
         socket.close();
     }
 }
