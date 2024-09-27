@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+
 public class Main {
 
     private static void handleSignal() {
@@ -13,6 +14,9 @@ public class Main {
 
         //write/flush output file if necessary
         System.out.println("Writing output.");
+
+        //finish the program when asked to finish
+        System.exit(0);
     }
 
     private static void initSignalHandlers() {
@@ -55,16 +59,30 @@ public class Main {
         System.out.println(parser.config() + "\n");
 
         System.out.println("Doing some initialization\n");
+        initialize(parser);
 
         System.out.println("Broadcasting and delivering messages...\n");
 
-        System.out.println("output parser:" + parser.output());
+        System.out.println("output parser:" + parser.output() + "\n");
 
         // After a process finishes broadcasting,
         // it waits forever for the delivery of messages.
         while (true) {
             // Sleep for 1 hour
             Thread.sleep(60 * 60 * 1000);
+        }
+    }
+
+
+    private static void initialize(Parser parser){
+
+        String config_path = parser.config();
+
+        if(parser.myId() == parser.getIndexReceive()){
+            // Receiver
+            System.out.println("I'm the receiver\n");
+        }else{
+            System.out.println("I'm a sender\n");
         }
     }
 }

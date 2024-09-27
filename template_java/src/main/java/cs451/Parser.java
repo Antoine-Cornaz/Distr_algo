@@ -70,4 +70,12 @@ public class Parser {
         return configParser.getPath();
     }
 
+    public int getNumberMessage(){
+        return configParser.getNumberMessage();
+    }
+
+    public int getIndexReceive(){
+        return configParser.getIndexReceive();
+    }
+
 }
