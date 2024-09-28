@@ -5,19 +5,18 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 /*
-I use this udp packet exemple
+I use this udp packet example
 
 https://www.baeldung.com/udp-in-java
  */
 
 public class Udp_receiver extends Thread {
 
-    private DatagramSocket socket;
-    private boolean running;
-    private byte[] buf = new byte[256];
-    private byte[] buf_answer = new byte[256];
+    private final DatagramSocket socket;
+    private final byte[] buf = new byte[256];
 
     public Udp_receiver(int port)  {
         System.out.println("Udp_receiver port " + port);
@@ -44,15 +43,16 @@ public class Udp_receiver extends Thread {
                 = new String(packet.getData(), 0, packet.getLength());
         System.out.println("udp_receiver: received " + received);
 
-
         try {
             socket.send(packet);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return received;
+        // Clear the buf for next time.
+        Arrays.fill(buf, (byte) 0);
 
+        return received;
     }
 
     public void close(){

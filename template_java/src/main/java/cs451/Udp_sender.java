@@ -3,8 +3,10 @@ package cs451;
 import java.io.IOException;
 import java.net.*;
 
+import static cs451.Constants.MAX_TIME_OUT_MS;
+
 /*
-I use this udp packet exemple
+I use this udp packet example
 
 https://www.baeldung.com/udp-in-java
  */
@@ -24,13 +26,15 @@ public class Udp_sender {
         }
     }
 
-    public String sendEcho(String msg, String ip, int port) {
+    public Boolean send(String msg, String ip, int port) {
         System.out.println("send echo msg " + msg + " ip " + ip + " port " + port);
+        DatagramPacket packet;
         try {
+            int length_msg = msg.length();
             buf = msg.getBytes();
             address = InetAddress.getByName(ip);
-            DatagramPacket packet
-                = new DatagramPacket(buf, buf.length, address, port);
+
+               packet = new DatagramPacket(buf, length_msg, address, port);
 
             socket.send(packet);
             System.out.println("udp_sender: message sended " + msg);
@@ -38,14 +42,26 @@ public class Udp_sender {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        /*packet = new DatagramPacket(buf, buf.length);
+
+
+
+        try {
+            socket.setSoTimeout(MAX_TIME_OUT_MS);
+            try {
+                socket.receive(packet);
+            }catch (SocketTimeoutException e){
+                System.out.println("udp_sender time out reception");
+                return false;
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         String received = new String(
                 packet.getData(), 0, packet.getLength());
         System.out.println("udp_sender: received " + received);
-        return received;
-         */
-        //Temporary return nothing
-        return "";
+        return true;
     }
 
     public void close() {

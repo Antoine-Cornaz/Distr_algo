@@ -25,9 +25,20 @@ public class Receiver {
                 running = false;
                 continue;
             }
-            String message = "d ? " + received + "\n";
+
+            //same number of message as number of space
+            int amount_message = (int) received.chars().filter(c -> c == (int) ' ').count();
+            // split to have 1 id, 2 message1, 3 message2, ..., 9 message8
+            String[] split_received = received.split(" ");
+
+            //TODO check if message already got.
+
             try {
-                fileWriter.write(message);
+                for (int i = 0; i < amount_message; i++) {
+                    String message = "d " + split_received[0] + " " + split_received[i + 1] + "\n";
+                    fileWriter.write(message);
+                }
+
                 fileWriter.flush();
             }catch (IOException e){
                 System.out.println(e);

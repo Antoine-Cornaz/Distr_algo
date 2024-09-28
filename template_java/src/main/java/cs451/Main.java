@@ -1,10 +1,12 @@
 package cs451;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.List;
+import java.lang.System;
 
 
 public class Main {
@@ -27,6 +29,8 @@ public class Main {
         if(sender != null){
             sender.close();
         }
+
+        System.exit(0);
     }
 
     private static void initSignalHandlers() {
@@ -110,7 +114,7 @@ public class Main {
             int[] destination_port = new int[number_message];
 
             for (int i = 0; i < number_message; i++) {
-                messages[i] = i;
+                messages[i] = i+1;
                 int destination_num = index_receive;
 
                 Host hosts_receiver = hosts.get(destination_num-1);
@@ -123,15 +127,18 @@ public class Main {
                 destination_port[i] = hosts_receiver.getPort();
             }
 
+            String outputFileName = parser.output();
+
             sender = new Sender(
                     number_message,
                     messages,
-                    destination_id,
+                    parser.myId(),
                     destination_ip,
-                    destination_port);
+                    destination_port,
+                    outputFileName
+                    );
 
-            int[] message2send = {0, 2, 7};
-            sender.send(message2send, 3);
+            sender.start();
             sender.close();
 
         }
