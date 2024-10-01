@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.lang.String;
 import java.util.Arrays;
 
-import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
+import static cs451.Constants.*;
 
 /*
 Class Sender
@@ -104,7 +104,7 @@ public class Sender {
             // "id m1"
             StringBuilder sb = new StringBuilder();
             sb.append(id_sender);
-            sb.append(" ");
+            sb.append(SEPARATOR);
             sb.append(list_message_num[messages[i]]);
             message_send[0] = i;
 
@@ -119,7 +119,7 @@ public class Sender {
                 if(port != list_port[index]) break;
 
                 // We can stack multiple message next to each other.
-                sb.append(" ");
+                sb.append(SEPARATOR_C);
                 sb.append(list_message_num[messages[index]]);
 
                 message_send[j+1] = index;
@@ -135,8 +135,10 @@ public class Sender {
             if(ack) {
                 try {
                     for (int j = 0; j < MAX_MESSAGE_PER_PACKET && message_send[j] != -1; j++) {
-                        list_received[message_send[j]] = true;
-                        fileWriter.write("b " + list_message_num[message_send[j]] + "\n");
+                        if( !list_received[message_send[j]]){
+                            list_received[message_send[j]] = true;
+                            fileWriter.write("b " + list_message_num[message_send[j]] + "\n");
+                        }
                     }
                     fileWriter.flush();
                 } catch (IOException e) {

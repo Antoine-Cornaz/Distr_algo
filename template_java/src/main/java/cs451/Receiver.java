@@ -3,40 +3,52 @@ package cs451;
 import java.lang.String;
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;  // Import the IOException class to handle errors
+import java.util.HashSet;
+import java.util.Set;
+
+import static cs451.Constants.SEPARATOR;
+import static cs451.Constants.SEPARATOR_C;
 
 
 public class Receiver {
 
     Udp_receiver udpReceiver;
     FileWriter fileWriter;
+    Set<Integer> messageSeenSet;
     public Receiver(int port, String ouputFileName){
+        // Create the file to write.
         try {
             fileWriter = new FileWriter(ouputFileName);
         }catch (IOException e){
             System.out.println(e);
         }
 
+
+        messageSeenSet = new HashSet<>();
         udpReceiver = new Udp_receiver(port);
-        String received;
+
+
         boolean running = true;
         while (running){
-            received = udpReceiver.listen_message();
+            String received = udpReceiver.listen_message();
             if (received.equals("end")) {
                 running = false;
                 continue;
             }
 
-            //same number of message as number of space
-            int amount_message = (int) received.chars().filter(c -> c == (int) ' ').count();
-            // split to have 1 id, 2 message1, 3 message2, ..., 9 message8
-            String[] split_received = received.split(" ");
-
-            //TODO check if message already got.
+            //same number of message as number of ','
+            int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
+            // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
+            String[] split_received = received.split(SEPARATOR);
 
             try {
                 for (int i = 0; i < amount_message; i++) {
                     String message = "d " + split_received[0] + " " + split_received[i + 1] + "\n";
-                    fileWriter.write(message);
+                    int message_number = Integer.parseInt(split_received[i + 1].trim());
+                    if (!messageSeenSet.contains(message_number)){
+                        messageSeenSet.add(message_number);
+                        fileWriter.write(message);
+                    }
                 }
 
                 fileWriter.flush();

@@ -30,7 +30,6 @@ public class Main {
             sender.close();
         }
 
-        System.exit(0);
     }
 
     private static void initSignalHandlers() {

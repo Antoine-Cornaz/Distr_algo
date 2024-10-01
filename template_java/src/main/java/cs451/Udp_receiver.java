@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import static cs451.Constants.NO_CHAR;
+
 /*
 I use this udp packet example
 
@@ -28,6 +30,9 @@ public class Udp_receiver extends Thread {
     }
 
     public String listen_message() {
+
+        Arrays.fill(buf, (byte) NO_CHAR);
+
         DatagramPacket packet
                 = new DatagramPacket(buf, buf.length);
         try {
@@ -50,7 +55,7 @@ public class Udp_receiver extends Thread {
         }
 
         // Clear the buf for next time.
-        Arrays.fill(buf, (byte) 0);
+
 
         return received;
     }

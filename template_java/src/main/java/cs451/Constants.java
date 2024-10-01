@@ -23,4 +23,9 @@ public class Constants {
 
     // Time out in ms
     public static final int MAX_TIME_OUT_MS = 1000;
+
+    public static final String SEPARATOR = ",";
+    public static final char SEPARATOR_C = ',';
+
+    public static final char NO_CHAR = ' ';
 }
