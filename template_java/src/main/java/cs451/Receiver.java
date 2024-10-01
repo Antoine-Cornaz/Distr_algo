@@ -14,7 +14,7 @@ public class Receiver {
 
     Udp_receiver udpReceiver;
     FileWriter fileWriter;
-    Set<Integer> messageSeenSet;
+    Set<IdMessage> messageSeenSet;
     public Receiver(int port, String ouputFileName){
         // Create the file to write.
         try {
@@ -44,8 +44,12 @@ public class Receiver {
             try {
                 for (int i = 0; i < amount_message; i++) {
                     int message_number = Integer.parseInt(split_received[i + 1].trim());
-                    if (!messageSeenSet.contains(message_number)){
-                        messageSeenSet.add(message_number);
+
+                    int id = Integer.parseInt(split_received[0]);
+                    IdMessage idMessage = new IdMessage(id, message_number);
+
+                    if (!messageSeenSet.contains(idMessage)){
+                        messageSeenSet.add(idMessage);
 
                         String message = "d " + split_received[0] + " " + message_number + "\n";
                         fileWriter.write(message);
@@ -56,11 +60,7 @@ public class Receiver {
             }catch (IOException e){
                 System.out.println(e);
             }
-
         }
-
-
-
     }
 
     public void close(){
