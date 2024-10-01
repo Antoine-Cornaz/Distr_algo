@@ -31,6 +31,7 @@ public class Udp_receiver extends Thread {
 
     public String listen_message() {
 
+        // Clear the buf.
         Arrays.fill(buf, (byte) NO_CHAR);
 
         DatagramPacket packet
@@ -53,8 +54,6 @@ public class Udp_receiver extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        // Clear the buf for next time.
 
 
         return received;

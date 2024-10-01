@@ -86,7 +86,7 @@ public class Sender {
                 j++;
             }
         }
-        amountNotReceived[0] = j-1;
+        amountNotReceived[0] = j;
         return notSend;
     }
 
@@ -111,16 +111,21 @@ public class Sender {
             // Create message " m2 m3 m4 m5"
             for (int j = 0; j < MAX_MESSAGE_PER_PACKET - 1; j++) {
                 int index = i + 1;
+                System.out.println("index " + index);
 
                 if(index >= number_message) break;
+                System.out.println("index2 " + index);
 
                 if(! ip.equals(list_ip[index])) break;
+                System.out.println("index3 " + index);
 
                 if(port != list_port[index]) break;
+                System.out.println("index4 " + index);
 
                 // We can stack multiple message next to each other.
                 sb.append(SEPARATOR_C);
                 sb.append(list_message_num[messages[index]]);
+
 
                 message_send[j+1] = index;
 

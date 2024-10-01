@@ -43,10 +43,11 @@ public class Receiver {
 
             try {
                 for (int i = 0; i < amount_message; i++) {
-                    String message = "d " + split_received[0] + " " + split_received[i + 1] + "\n";
                     int message_number = Integer.parseInt(split_received[i + 1].trim());
                     if (!messageSeenSet.contains(message_number)){
                         messageSeenSet.add(message_number);
+
+                        String message = "d " + split_received[0] + " " + message_number + "\n";
                         fileWriter.write(message);
                     }
                 }
