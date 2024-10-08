@@ -44,14 +44,14 @@ public class Sender {
             throw new RuntimeException(e);
         }
 
-        System.out.println("number message " + number_message);
+        //System.out.println("number message " + number_message);
         for (int i = 0; i < number_message; i++) {
-            System.out.println(
+            /*System.out.println(
                     "message " + messages[i] +
                     " id sender " + id_sender +
                     " ip " + ips[i] +
                     " ports " + ports[i] +
-                    " received " + list_received[i]);
+                    " received " + list_received[i]);*/
         }
     }
 
@@ -111,16 +111,12 @@ public class Sender {
             // Create message " m2 m3 m4 m5"
             for (int j = 0; j < MAX_MESSAGE_PER_PACKET - 1; j++) {
                 int index = i + 1;
-                System.out.println("index " + index);
 
                 if(index >= number_message) break;
-                System.out.println("index2 " + index);
 
                 if(! ip.equals(list_ip[index])) break;
-                System.out.println("index3 " + index);
 
                 if(port != list_port[index]) break;
-                System.out.println("index4 " + index);
 
                 // We can stack multiple message next to each other.
                 sb.append(SEPARATOR_C);
@@ -140,7 +136,7 @@ public class Sender {
             if(ack) {
                 try {
                     for (int j = 0; j < MAX_MESSAGE_PER_PACKET && message_send[j] != -1; j++) {
-                        if( !list_received[message_send[j]]){
+                        if(!list_received[message_send[j]]){
                             list_received[message_send[j]] = true;
                             fileWriter.write("b " + list_message_num[message_send[j]] + "\n");
                         }

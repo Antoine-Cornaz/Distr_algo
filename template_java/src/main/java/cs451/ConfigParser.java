@@ -30,17 +30,17 @@ public class ConfigParser {
     }
 
     private void readFile() {
-        System.out.println("ConfigParser: read file");
+        //System.out.println("ConfigParser: read file");
         try {
             File myObj = new File(getPath());
             Scanner myReader = new Scanner(myObj);
             String data = myReader.nextLine();
-            System.out.println("data " + data);
+            //System.out.println("data " + data);
             String[] data_split = data.split(" ");
             number_message = Integer.parseInt(data_split[0]);
             index_receive = Integer.parseInt(data_split[1]);
-            System.out.println("number message " + number_message);
-            System.out.println("index receive " + index_receive);
+            //System.out.println("number message " + number_message);
+            //System.out.println("index receive " + index_receive);
 
             myReader.close();
         } catch (FileNotFoundException e) {

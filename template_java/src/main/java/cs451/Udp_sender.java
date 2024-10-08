@@ -27,7 +27,7 @@ public class Udp_sender {
     }
 
     public Boolean send(String msg, String ip, int port) {
-        System.out.println("send echo msg " + msg + " ip " + ip + " port " + port);
+        //System.out.println("send echo msg " + msg + " ip " + ip + " port " + port);
         DatagramPacket packet;
         try {
             int length_msg = msg.length();
@@ -37,7 +37,7 @@ public class Udp_sender {
                packet = new DatagramPacket(buf, length_msg, address, port);
 
             socket.send(packet);
-            System.out.println("udp_sender: message sended " + msg);
+            //System.out.println("udp_sender: message sended " + msg);
             //socket.receive(packet);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -50,7 +50,7 @@ public class Udp_sender {
             try {
                 socket.receive(packet);
             }catch (SocketTimeoutException e){
-                System.out.println("udp_sender time out reception");
+                //System.out.println("udp_sender time out reception");
                 return false;
             }
 
@@ -60,7 +60,7 @@ public class Udp_sender {
 
         String received = new String(
                 packet.getData(), 0, packet.getLength());
-        System.out.println("udp_sender: received " + received);
+        //System.out.println("udp_sender: received " + received);
         return true;
     }
 

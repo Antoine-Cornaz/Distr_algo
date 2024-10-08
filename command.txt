@@ -7,3 +7,4 @@ pour kill id 8234
 killall -9 8234
 
 setxkbmap ch
+sudo fuser -k 11002/udp

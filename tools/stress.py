@@ -339,7 +339,8 @@ def main(parser_results, testConfig):
         hostsFile, configFile = validation.generateFifoConfig(logsDir)
         configFiles = [configFile]
     elif cmd == "agreement":
-        proposals = parser_results.proposals
+        proposals = parser_results.proposals                os.kill(self.pid, sig)
+
         pmv = parser_results.proposal_max_values
         pdv = parser_results.proposals_distinct_values
 

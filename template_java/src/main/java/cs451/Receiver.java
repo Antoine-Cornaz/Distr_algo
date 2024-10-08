@@ -15,10 +15,10 @@ public class Receiver {
     Udp_receiver udpReceiver;
     FileWriter fileWriter;
     Set<IdMessage> messageSeenSet;
-    public Receiver(int port, String ouputFileName){
+    public Receiver(int port, String outputFileName){
         // Create the file to write.
         try {
-            fileWriter = new FileWriter(ouputFileName);
+            fileWriter = new FileWriter(outputFileName);
         }catch (IOException e){
             System.out.println(e);
         }

@@ -101,7 +101,6 @@ public class Main {
             String outputFileName = parser.output();
             receiver = new Receiver(port, outputFileName);
         }else{
-            System.out.println("I'm a sender\n");
             int number_message = parser.getNumberMessage();
 
 

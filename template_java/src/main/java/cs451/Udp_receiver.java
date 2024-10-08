@@ -21,7 +21,7 @@ public class Udp_receiver extends Thread {
     private final byte[] buf = new byte[256];
 
     public Udp_receiver(int port)  {
-        System.out.println("Udp_receiver port " + port);
+        //System.out.println("Udp_receiver port " + port);
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {
@@ -47,7 +47,7 @@ public class Udp_receiver extends Thread {
         packet = new DatagramPacket(buf, buf.length, address, port);
         String received
                 = new String(packet.getData(), 0, packet.getLength());
-        System.out.println("udp_receiver: received " + received);
+        //System.out.println("udp_receiver: received " + received);
 
         try {
             socket.send(packet);
