@@ -13,6 +13,7 @@ public class Main {
 
     static Receiver receiver;
     static Sender sender;
+    static boolean hasWritten = false;
 
     private static void handleSignal() {
         //immediately stop network packet processing
@@ -27,6 +28,7 @@ public class Main {
         }
 
         if(sender != null){
+            sender.write();
             sender.close();
         }
 
@@ -80,6 +82,10 @@ public class Main {
 
         // After a process finishes broadcasting,
         // it waits forever for the delivery of messages.
+        if(sender != null){
+            sender.write();
+        }
+
         while (true) {
             // Sleep for 1 hour
             Thread.sleep(60 * 60 * 1000);

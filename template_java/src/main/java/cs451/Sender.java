@@ -142,23 +142,38 @@ public class Sender {
 
             if(!received.isBlank() && amount_message != 0) {
 
-                try {
-                    for (int j = 0; j < amount_message; j++) {
-                        int message_number = Integer.parseInt(split_received[j + 1].trim());
-                        if (!list_received[message_number-1]){
-                            list_received[message_number-1] = true;
+                for (int j = 0; j < amount_message; j++) {
+                    int message_number = Integer.parseInt(split_received[j + 1].trim());
+                    if (!list_received[message_number-1]){
+                        list_received[message_number-1] = true;
 
-                            String message = "b " + message_number + "\n";
-                            fileWriter.write(message);
-                        }
+                        //String message = "b " + message_number + "\n";
+                        //fileWriter.write(message);
                     }
-
-                    fileWriter.flush();
-                }catch (IOException e){
-                    System.out.println(e);
                 }
+
+                //fileWriter.flush();
             }
             i++;
+        }
+    }
+
+    public void write() {
+        System.out.println("WRITING\n");
+        for (int i = 0; i < number_message; i++) {
+            if (list_received[i]){
+                String message = "b " + i+1 + "\n";
+                try {
+                    fileWriter.write(message);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        try {
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

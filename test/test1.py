@@ -2,6 +2,10 @@ from multiprocessing import Process
 import subprocess
 import shlex
 import time
+import threading
+import signal
+
+from enum import Enum
 
 """
 This is a basic test file
@@ -10,6 +14,53 @@ with 1000 messages
 process 2 is receiver
 """
 NUMBER_MESSAGES = 1000  #Change both in CONFIG
+
+
+
+# Process State Enum for managing process states
+class ProcessState(Enum):
+    RUNNING = 1
+    STOPPED = 2
+    TERMINATED = 3
+
+# ProcessInfo class to hold information about a subprocess and manage state
+class ProcessInfo:
+    def __init__(self, handle):
+        self.lock = threading.Lock()  # Thread safety when managing the process
+        self.handle = handle          # Subprocess handle
+        self.state = ProcessState.RUNNING  # Initial state is RUNNING
+
+    @staticmethod
+    def stateToSignal(state):
+        # Convert ProcessState to the appropriate signal
+        if state == ProcessState.RUNNING:
+            return signal.SIGCONT
+        if state == ProcessState.STOPPED:
+            return signal.SIGSTOP
+        if state == ProcessState.TERMINATED:
+            return signal.SIGTERM
+
+    @staticmethod
+    def stateToSignalStr(state):
+        # Get the signal name as a string (for logging purposes)
+        if state == ProcessState.RUNNING:
+            return "SIGCONT"
+        if state == ProcessState.STOPPED:
+            return "SIGSTOP"
+        if state == ProcessState.TERMINATED:
+            return "SIGTERM"
+
+    @staticmethod
+    def validStateTransition(current, desired):
+        # Validate if the transition between states is allowed
+        if current == ProcessState.TERMINATED:
+            return False
+        if current == ProcessState.RUNNING:
+            return desired == ProcessState.STOPPED or desired == ProcessState.TERMINATED
+        if current == ProcessState.STOPPED:
+            return desired == ProcessState.RUNNING
+        return False
+
 
 
 def start_subprocess(number):
@@ -27,8 +78,39 @@ def main():
 
     print("start process")
 
+    # Start three Java subprocesses
+    p1 = ProcessInfo(start_subprocess('1'))
+    p2 = ProcessInfo(start_subprocess('2'))
+    p3 = ProcessInfo(start_subprocess('3'))
+
+    processes = [p1, p2, p3]
+
+    # Wait a maximum of 1 second for processes to initialize
+    time.sleep(1)
+    print("Processes initialized")
+
+    # Attempt to gracefully terminate all processes
+    for proc in processes:
+        with proc.lock:
+            print("terminate gracefully", proc)
+            proc.handle.send_signal(signal.SIGTERM)  # Send SIGTERM for graceful termination
+            proc.state = ProcessState.TERMINATED  # Update state to TERMINATED
+            print(f"Sent SIGTERM to process {proc.handle.pid}")
+
+    # Wait for another second to allow processes to terminate gracefully
+    time.sleep(1)
+
+    # Ensure the processes are killed if they haven't terminated
+    print("Killing remaining processes")
+    for proc in processes:
+        with proc.lock:
+            proc.handle.kill()  # Forcefully kill the process
+            print(f"Killed process {proc.handle.pid}")
+
+    subprocess.call(shlex.split('sudo fuser -k 11002/udp'))
+
     # Start all process
-    p1 = start_subprocess('1')
+    """p1 = start_subprocess('1')
     p2 = start_subprocess('2')
     p3 = start_subprocess('3')
     # Wait a maximum of 1 second
@@ -37,6 +119,9 @@ def main():
     p1.terminate()
     p2.terminate()
     p3.terminate()
+
+    p1.handle.send_signal(signal.SIGTERM)
+
     time.sleep(1)
     print("Kill processes")
     p1.kill()
@@ -46,7 +131,7 @@ def main():
     #Just in case kill process who listen
     subprocess.call(shlex.split('sudo fuser -k 11002/udp'))
     print("processes killed")
-
+    """
     #
     r1, r3 = verify_receiver('2')
     s_1 = verify_sender('1')
