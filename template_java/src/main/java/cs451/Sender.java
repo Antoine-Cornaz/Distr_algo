@@ -131,18 +131,30 @@ public class Sender {
             // Add end of message
             String composed_message = sb.toString();
 
-            boolean ack = udpSender.send(composed_message, ip, port);
+            String received = udpSender.send(composed_message, ip, port);
+            //System.out.println("Received : " + received);
 
-            if(ack) {
+            //same number of message as number of ','
+            int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
+            //System.out.println("amount message " + amount_message);
+            // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
+            String[] split_received = received.split(SEPARATOR);
+
+            if(!received.isBlank() && amount_message != 0) {
+
                 try {
-                    for (int j = 0; j < MAX_MESSAGE_PER_PACKET && message_send[j] != -1; j++) {
-                        if(!list_received[message_send[j]]){
-                            list_received[message_send[j]] = true;
-                            fileWriter.write("b " + list_message_num[message_send[j]] + "\n");
+                    for (int j = 0; j < amount_message; j++) {
+                        int message_number = Integer.parseInt(split_received[j + 1].trim());
+                        if (!list_received[message_number-1]){
+                            list_received[message_number-1] = true;
+
+                            String message = "b " + message_number + "\n";
+                            fileWriter.write(message);
                         }
                     }
+
                     fileWriter.flush();
-                } catch (IOException e) {
+                }catch (IOException e){
                     System.out.println(e);
                 }
             }

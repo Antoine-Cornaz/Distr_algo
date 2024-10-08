@@ -22,7 +22,7 @@ public class Constants {
     public static final int MAX_MESSAGE_PER_PACKET = 8;
 
     // Time out in ms
-    public static final int MAX_TIME_OUT_MS = 10;
+    public static final int MAX_TIME_OUT_MS = 20;
 
     public static final String SEPARATOR = ",";
     public static final char SEPARATOR_C = ',';
