@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 10000000  #Change both here and in call
+NUMBER_MESSAGES = 100000  #Change both here and in call
 
 
 def main():
@@ -24,26 +24,34 @@ def main():
     # Build project
     subprocess.call(shlex.split('../template_java/build.sh'))
 
+    # delete folder prof_test
+    subprocess.call(shlex.split('rm ../prof_test/*'))
+
     print("start process")
 
+    # Call teacher test
     subprocess.call(shlex.split('../tools/stress.py perfect -r ../template_java/run.sh -l ../prof_test/ -p 3 -m ' + str(NUMBER_MESSAGES)))
 
     r2, r3 = verify_receiver('01')
-    s_2 = verify_sender('02')
-    s_3 = verify_sender('03')
+    s2 = verify_sender('02')
+    s3 = verify_sender('03')
 
-    if not s_2.issubset(r2):
-        print("Some messages has been delivered as sent but not received from process 1")
-        print(s_2.difference(r2))
+    if not r2.issubset(s2):
+        print("Some messages has been delivered for the receiver but never sent p2")
+        diff = r2.difference(s2)
+        if len(diff) < 10:
+            print(diff)
 
-    if not s_3.issubset(r3):
-        print("Some messages has been delivered as sent but not received from process 3")
-        print(s_3.difference(r3))
+    if not r3.issubset(s3):
+        print("Some messages has been delivered for the receiver but never sent p3")
+        diff = r3.difference(s3)
+        if len(diff) < 10:
+            print(diff)
 
-    print("s2 ", len(s_2), " r2 " , len(r2))
-    print("s3 ", len(s_3), " r3 " , len(r3))
+    print("s2 ", len(s2), " r2 " , len(r2))
+    print("s3 ", len(s3), " r3 " , len(r3))
 
-    send_ratio = (len(s_2) + len(s_3))/(2*NUMBER_MESSAGES)
+    send_ratio = (len(s2) + len(s3))/(2*NUMBER_MESSAGES)
     received_ratio = (len(r2) + len(r3))/(2*NUMBER_MESSAGES)
 
     print("sent " + str(send_ratio))
@@ -109,10 +117,6 @@ def verify_sender(number):
     except:
         print("ERROR in reading file " + number + " as a sender")
         return value_p
-
-    """if len(value_p) != NUMBER_MESSAGES:
-        print("ERROR not all messages sent from p:" + number + " " + str(len(value_p)) + " should be " + str(NUMBER_MESSAGES))
-        return False"""
 
     return value_p
 

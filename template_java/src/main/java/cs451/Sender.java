@@ -23,6 +23,7 @@ public class Sender {
     private final int[] list_port;
 
     private final boolean[] list_received;
+    private final boolean[] list_send;
 
     private final Udp_sender udpSender;
     private final FileWriter fileWriter;
@@ -36,6 +37,7 @@ public class Sender {
 
         // Initialize to false
         list_received = new boolean[number_message];
+        list_send = new boolean[number_message];
 
         udpSender = new Udp_sender();
         try {
@@ -109,9 +111,11 @@ public class Sender {
             sb.append(SEPARATOR);
             sb.append(list_message_num[messages[i]]);
             message_send[0] = i;
+            list_send[message_send[0]] = true;
 
             // Create message " m2 m3 m4 m5"
             for (int j = 0; j < MAX_MESSAGE_PER_PACKET - 1; j++) {
+                // i is increased at the end of the loop so we don't need j.
                 int index = i + 1;
 
                 if(index >= number_message) break;
@@ -126,6 +130,7 @@ public class Sender {
 
 
                 message_send[j+1] = index;
+                list_send[index] = true;
 
                 i++;
             }
@@ -155,17 +160,10 @@ public class Sender {
                         break;
                     }
 
-                    //System.out.print("$"+message_number+"$");
                     if (!list_received[message_number-1]){
                         list_received[message_number-1] = true;
-
-                        //String message = "b " + message_number + "\n";
-                        //fileWriter.write(message);
                     }
                 }
-                //System.out.println();
-
-                //fileWriter.flush();
             }
             i++;
         }
@@ -174,7 +172,7 @@ public class Sender {
     public void write() {
         System.out.println("WRITING\n");
         for (int i = 0; i < number_message; i++) {
-            if (list_received[i]){
+            if (list_send[i]){
                 int i_1 = i+1;
                 String message = "b " + i_1 + "\n";
                 try {
