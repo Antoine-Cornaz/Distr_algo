@@ -1,0 +1,12 @@
+./run.sh --id 1 --hosts ../example/hosts --output ../example/output/1.output ../example/configs/perfect-links.config
+
+pour savoir qui utilise le port 5555
+lsof -i :5555
+
+pour kill id 8234
+killall -9 8234
+
+setxkbmap ch
+sudo fuser -k 11002/udp
+
+./stress.py perfect -r ../template_java/run.sh -l ../prof_test/ -p 3 -m 10
