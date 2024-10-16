@@ -51,11 +51,11 @@ def main():
     print("s2 ", len(s2), " r2 " , len(r2))
     print("s3 ", len(s3), " r3 " , len(r3))
 
-    send_ratio = (len(s2) + len(s3))/(2*NUMBER_MESSAGES)
-    received_ratio = (len(r2) + len(r3))/(2*NUMBER_MESSAGES)
+    send_ratio = 100*(len(s2) + len(s3))/(2*NUMBER_MESSAGES)
+    received_ratio = 100*(len(r2) + len(r3))/(2*NUMBER_MESSAGES)
 
-    print("sent " + str(send_ratio))
-    print("recived " + str(received_ratio))
+    print("sent " + str(send_ratio) + "%")
+    print("recived " + str(received_ratio) + "%")
 
     print("Finish")
 
