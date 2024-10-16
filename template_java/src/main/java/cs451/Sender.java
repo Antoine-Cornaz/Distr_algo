@@ -13,7 +13,10 @@ Class Sender
 
 Will use Udp_sender to send message 1 by one.
  */
-public class Sender {
+
+//for thread
+// https://www.geeksforgeeks.org/multithreading-in-java/
+public class Sender extends Thread {
     private final int number_message;
     private final int[] list_message_num;
     private final int id_sender;
@@ -26,9 +29,17 @@ public class Sender {
     private final boolean[] list_send;
 
     private final Udp_sender udpSender;
+    //private final Udp_receiver udpReceiver;
     private final FileWriter fileWriter;
 
-    public Sender(int number_message, int[] messages, int id_sender, String[] ips, int[] ports, String fileName){
+    public Sender(int number_message,
+                  int[] messages,
+                  int id_sender,
+                  String[] ips,
+                  int[] ports,
+                  String fileName,
+                  int port_sender,
+                  boolean[] list_received){
         this.number_message = number_message;
         this.list_message_num = messages;
         this.list_ip = ips;
@@ -36,30 +47,23 @@ public class Sender {
         this.id_sender = id_sender;
 
         // Initialize to false
-        list_received = new boolean[number_message];
+        this.list_received = list_received;
         list_send = new boolean[number_message];
 
         udpSender = new Udp_sender();
+        //udpReceiver = new Udp_receiver(port_sender);
+
         try {
             this.fileWriter = new FileWriter(fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        //System.out.println("number message " + number_message);
-        /*
-        for (int i = 0; i < number_message; i++) {
-            System.out.println(
-                    "message " + messages[i] +
-                    " id sender " + id_sender +
-                    " ip " + ips[i] +
-                    " ports " + ports[i] +
-                    " received " + list_received[i]);
-        }
-        */
     }
 
-    public void start(){
+
+
+    public void run(){
+        System.out.println("Start run");
         int[] messages = new int[number_message];
         for (int i = 0; i < number_message; i++) {
             messages[i] = i;
@@ -139,32 +143,8 @@ public class Sender {
             String composed_message = sb.toString();
             //System.out.println("composed_message $" + composed_message+ "$");
 
-            String received = udpSender.send(composed_message, ip, port);
+            udpSender.send(composed_message, ip, port);
             //System.out.println("Received : " + received);
-
-            //same number of message as number of ','
-            int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
-            //System.out.println("amount message " + amount_message);
-            // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
-            String[] split_received = received.split(SEPARATOR);
-
-
-            if(!received.isBlank() && amount_message != 0) {
-                //System.out.print("received $" + received + "$  ");
-                for (int j = 0; j < amount_message; j++) {
-                    int message_number = 0;
-                    try {
-                        message_number = Integer.parseInt(split_received[j+1].trim());
-                    }catch (Exception e){
-                        System.out.println("message break down. Some part are missing :(");
-                        break;
-                    }
-
-                    if (!list_received[message_number-1]){
-                        list_received[message_number-1] = true;
-                    }
-                }
-            }
             i++;
         }
     }

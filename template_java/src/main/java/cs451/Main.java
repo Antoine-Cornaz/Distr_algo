@@ -1,10 +1,5 @@
 package cs451;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.List;
 import java.lang.System;
 
@@ -92,7 +87,6 @@ public class Main {
 
     private static void initialize(Parser parser){
 
-        String config_path = parser.config();
         int index_receive = parser.getIndexReceive();
         List<Host> hosts = parser.hosts();
 
@@ -113,15 +107,16 @@ public class Main {
             int[] destination_id = new int[number_message];
             String[] destination_ip = new String[number_message];
             int[] destination_port = new int[number_message];
+            Host host_sender = hosts.get(parser.myId()-1);
 
             for (int i = 0; i < number_message; i++) {
                 messages[i] = i+1;
-                int destination_num = index_receive;
 
-                Host hosts_receiver = hosts.get(destination_num-1);
+                Host hosts_receiver = hosts.get(index_receive -1);
+
 
                 // I hop the id  is equal to the id number in the list
-                assert destination_num == hosts_receiver.getId();
+                assert index_receive == hosts_receiver.getId();
 
                 destination_id[i] = hosts_receiver.getId();
                 destination_ip[i] = hosts_receiver.getIp();
@@ -129,6 +124,7 @@ public class Main {
             }
 
             String outputFileName = parser.output();
+            boolean[] message_received = new boolean[number_message];
 
             sender = new Sender(
                     number_message,
@@ -136,12 +132,20 @@ public class Main {
                     parser.myId(),
                     destination_ip,
                     destination_port,
-                    outputFileName
+                    outputFileName,
+                    host_sender.getPort(),
+                    message_received
                     );
 
-            sender.start();
-            sender.close();
+            Sender_ack senderAck = new Sender_ack(
+                    host_sender.getPort(),
+                    message_received,
+                    number_message
+            );
 
+            //Send message
+            sender.start();
+            senderAck.start();
         }
     }
 }

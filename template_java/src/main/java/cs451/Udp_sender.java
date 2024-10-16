@@ -28,7 +28,7 @@ public class Udp_sender {
         }
     }
 
-    public String send(String msg, String ip, int port) {
+    public void send(String msg, String ip, int port) {
         //System.out.println("send echo msg " + msg + " ip " + ip + " port " + port);
         DatagramPacket packet;
         try {
@@ -47,26 +47,7 @@ public class Udp_sender {
 
 
 
-        try {
-            socket.setSendBufferSize(255);
-            socket.setSoTimeout(MAX_TIME_OUT_MS);
-
-            Arrays.fill(buf, (byte) NO_CHAR);
-            try {
-                socket.receive(packet);
-            }catch (SocketTimeoutException e){
-                //System.out.println("udp_sender time out reception");
-                return "";
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String received = new String(
-                packet.getData(), 0, packet.getLength());
-        //System.out.println("udp_sender: received " + received);
-        return received;
+        return;
     }
 
     public void close() {
