@@ -15,7 +15,7 @@ public class Receiver {
     Udp_receiver udpReceiver;
     FileWriter fileWriter;
     Set<IdMessage> messageSeenSet;
-    public Receiver(int port, String outputFileName){
+    public Receiver(int port, String outputFileName, int[] ports){
         // Create the file to write.
         try {
             fileWriter = new FileWriter(outputFileName);
@@ -31,15 +31,15 @@ public class Receiver {
         boolean running = true;
         while (running){
             String received = udpReceiver.listen_message();
-            if (received.equals("end")) {
-                running = false;
-                continue;
-            }
+
 
             //same number of message as number of ','
             int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
             // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
             String[] split_received = received.split(SEPARATOR);
+
+            int port_send_back = ports[Integer.parseInt(split_received[0]) -1];
+            udpReceiver.sendBack(port_send_back);
 
             try {
                 for (int i = 0; i < amount_message; i++) {

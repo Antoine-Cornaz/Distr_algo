@@ -44,10 +44,6 @@ public class Udp_sender {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
-        return;
     }
 
     public void close() {

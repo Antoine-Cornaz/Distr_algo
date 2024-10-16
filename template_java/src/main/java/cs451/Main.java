@@ -8,7 +8,6 @@ public class Main {
 
     static Receiver receiver;
     static Sender sender;
-    static boolean hasWritten = false;
 
     private static void handleSignal() {
         //immediately stop network packet processing
@@ -89,6 +88,9 @@ public class Main {
 
         int index_receive = parser.getIndexReceive();
         List<Host> hosts = parser.hosts();
+        int[] ports = hosts.stream()
+                .mapToInt(Host::getPort)
+                .toArray();
 
         if(parser.myId() == index_receive){
             // Receiver
@@ -96,7 +98,7 @@ public class Main {
             Host hosts_receiver = hosts.get(index_receive - 1);
             int port = hosts_receiver.getPort();
             String outputFileName = parser.output();
-            receiver = new Receiver(port, outputFileName);
+            receiver = new Receiver(port, outputFileName, ports);
         }else{
             int number_message = parser.getNumberMessage();
 
@@ -104,7 +106,6 @@ public class Main {
             // Create messages and destinations
             int[] messages = new int[number_message];
 
-            int[] destination_id = new int[number_message];
             String[] destination_ip = new String[number_message];
             int[] destination_port = new int[number_message];
             Host host_sender = hosts.get(parser.myId()-1);
@@ -112,19 +113,19 @@ public class Main {
             for (int i = 0; i < number_message; i++) {
                 messages[i] = i+1;
 
-                Host hosts_receiver = hosts.get(index_receive -1);
+                Host hosts_receiver = hosts.get(index_receive - 1);
 
 
                 // I hop the id  is equal to the id number in the list
                 assert index_receive == hosts_receiver.getId();
 
-                destination_id[i] = hosts_receiver.getId();
                 destination_ip[i] = hosts_receiver.getIp();
                 destination_port[i] = hosts_receiver.getPort();
             }
 
             String outputFileName = parser.output();
             boolean[] message_received = new boolean[number_message];
+            int port_sender = host_sender.getPort();
 
             sender = new Sender(
                     number_message,
@@ -133,12 +134,12 @@ public class Main {
                     destination_ip,
                     destination_port,
                     outputFileName,
-                    host_sender.getPort(),
-                    message_received
+                    message_received,
+                    port_sender
                     );
 
             Sender_ack senderAck = new Sender_ack(
-                    host_sender.getPort(),
+                    port_sender,
                     message_received,
                     number_message
             );

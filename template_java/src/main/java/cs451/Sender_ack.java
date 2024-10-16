@@ -13,18 +13,20 @@ public class Sender_ack extends Thread{
                       boolean[] list_received,
                       int number_message){
 
-        System.out.println("port sender " + port_sender);
-        this.list_received = list_received;
         this.udpReceiver = new Udp_receiver(port_sender);
+        this.list_received = list_received;
+
         this.number_message = number_message;
     }
 
     public void run(){
-        System.out.println("Start listenning");
+        System.out.println("sender_ack Start listenning");
         boolean finished = false;
 
         while (!finished){
+            System.out.println("sender_ack A");
             String received = udpReceiver.listen_message();
+            System.out.println("sender_ack received $" + received + "$");
             //same number of message as number of ','
             int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
             //System.out.println("amount message " + amount_message);
@@ -39,11 +41,12 @@ public class Sender_ack extends Thread{
                     try {
                         message_number = Integer.parseInt(split_received[j+1].trim());
                     }catch (Exception e){
-                        System.out.println("message break down. Some part are missing :(");
+                        System.out.println("sender_ack message break down. Some part are missing :(");
                         break;
                     }
 
                     list_received[message_number-1] = true;
+                    System.out.println("sender_ack message received in list " + (message_number-1) );
 
                 }
             }

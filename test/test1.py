@@ -19,13 +19,12 @@ NUMBER_MESSAGES = 100000  #Change both here and in call
 
 
 def main():
+
     print("Start build")
 
     # Build project
     subprocess.call(shlex.split('../template_java/build.sh'))
 
-    # delete folder prof_test
-    subprocess.call(shlex.split('rm ../prof_test/*'))
 
     print("start process")
 

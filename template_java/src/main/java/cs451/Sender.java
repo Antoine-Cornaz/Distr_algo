@@ -29,7 +29,6 @@ public class Sender extends Thread {
     private final boolean[] list_send;
 
     private final Udp_sender udpSender;
-    //private final Udp_receiver udpReceiver;
     private final FileWriter fileWriter;
 
     public Sender(int number_message,
@@ -38,8 +37,8 @@ public class Sender extends Thread {
                   String[] ips,
                   int[] ports,
                   String fileName,
-                  int port_sender,
-                  boolean[] list_received){
+                  boolean[] list_received,
+                  int port_sender){
         this.number_message = number_message;
         this.list_message_num = messages;
         this.list_ip = ips;
@@ -77,6 +76,7 @@ public class Sender extends Thread {
         while (amountNotReceived[0] != 0){
             send(notReceived, amountNotReceived[0]);
             notReceived = notReceivedMsg(amountNotReceived);
+            System.out.println("amount not received " + amountNotReceived[0]);
         }
         System.out.println("all messages successfully sent");
     }
@@ -150,7 +150,7 @@ public class Sender extends Thread {
     }
 
     public void write() {
-        System.out.println("WRITING\n");
+        System.out.println("Writing\n");
         for (int i = 0; i < number_message; i++) {
             if (list_send[i]){
                 int i_1 = i+1;
