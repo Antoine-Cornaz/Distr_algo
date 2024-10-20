@@ -13,13 +13,15 @@ public class Main {
         //immediately stop network packet processing
         System.out.println("Immediately stopping network packet processing.");
 
+        if (receiver != null) receiver.stop();
+        if(sender != null) sender.stop_message();
+
         //write/flush output file if necessary
         System.out.println("Writing output.");
 
         //finish the program when asked to finish
-        if(receiver != null){
-            receiver.close();
-        }
+        if(receiver != null) receiver.close();
+
 
         if(sender != null){
             sender.write();

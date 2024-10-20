@@ -36,10 +36,8 @@ public class Udp_receiver extends Thread {
         Arrays.fill(buf, (byte) NO_CHAR);
 
         packet = new DatagramPacket(buf, buf.length);
-        System.out.println("not sender_ack, not received " + socket.getPort());
         try {
             socket.receive(packet);
-            System.out.println("not sender_ack, received " + socket.getPort());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -49,7 +47,6 @@ public class Udp_receiver extends Thread {
         packet = new DatagramPacket(buf, buf.length, address, port);
         String received
                 = new String(packet.getData(), 0, packet.getLength());
-        //System.out.println("udp_receiver: received " + received);
 
         return received;
     }

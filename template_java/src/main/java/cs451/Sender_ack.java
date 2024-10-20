@@ -20,13 +20,10 @@ public class Sender_ack extends Thread{
     }
 
     public void run(){
-        System.out.println("sender_ack Start listenning");
         boolean finished = false;
 
         while (!finished){
-            System.out.println("sender_ack A");
             String received = udpReceiver.listen_message();
-            System.out.println("sender_ack received $" + received + "$");
             //same number of message as number of ','
             int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
             //System.out.println("amount message " + amount_message);
@@ -46,8 +43,6 @@ public class Sender_ack extends Thread{
                     }
 
                     list_received[message_number-1] = true;
-                    System.out.println("sender_ack message received in list " + (message_number-1) );
-
                 }
             }
 

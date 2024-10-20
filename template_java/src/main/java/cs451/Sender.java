@@ -169,6 +169,10 @@ public class Sender extends Thread {
         }
     }
 
+    public void stop_message(){
+
+    }
+
     public void close(){
         udpSender.close();
     }
