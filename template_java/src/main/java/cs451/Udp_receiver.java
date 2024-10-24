@@ -19,9 +19,10 @@ public class Udp_receiver extends Thread {
 
     private final DatagramSocket socket;
     private final byte[] buf = new byte[256];
+    private DatagramPacket packet;
 
     public Udp_receiver(int port)  {
-        //System.out.println("Udp_receiver port " + port);
+        System.out.println("Udp_receiver port " + port);
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {
@@ -34,8 +35,7 @@ public class Udp_receiver extends Thread {
         // Clear the buf.
         Arrays.fill(buf, (byte) NO_CHAR);
 
-        DatagramPacket packet
-                = new DatagramPacket(buf, buf.length);
+        packet = new DatagramPacket(buf, buf.length);
         try {
             socket.receive(packet);
         } catch (IOException e) {
@@ -47,16 +47,18 @@ public class Udp_receiver extends Thread {
         packet = new DatagramPacket(buf, buf.length, address, port);
         String received
                 = new String(packet.getData(), 0, packet.getLength());
-        //System.out.println("udp_receiver: received " + received);
 
+        return received;
+    }
+
+    public void sendBack(int port){
         try {
+            InetAddress address = packet.getAddress(); // Use the same address as received
+            packet = new DatagramPacket(packet.getData(), packet.getLength(), address, port);
             socket.send(packet);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
-        return received;
     }
 
     public void close(){

@@ -339,7 +339,8 @@ def main(parser_results, testConfig):
         hostsFile, configFile = validation.generateFifoConfig(logsDir)
         configFiles = [configFile]
     elif cmd == "agreement":
-        proposals = parser_results.proposals                os.kill(self.pid, sig)
+        proposals = parser_results.proposals
+        os.kill(self.pid, sig)
 
         pmv = parser_results.proposal_max_values
         pdv = parser_results.proposals_distinct_values
@@ -494,9 +495,9 @@ if __name__ == "__main__":
         "concurrency": 8,  # How many threads are interferring with the running processes
         "attempts": 8,  # How many interferring attempts each threads does
         "attemptsDistribution": {  # Probability with which an interferring thread will
-            "STOP": 0.48,  # select an interferring action (make sure they add up to 1)
-            "CONT": 0.48,
-            "TERM": 0.04,
+            "STOP": 0.5,  # select an interferring action (make sure they add up to 1)
+            "CONT": 0.5,
+            "TERM": 0.0,#0.04
         },
     }
 

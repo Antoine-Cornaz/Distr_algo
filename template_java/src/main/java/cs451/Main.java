@@ -1,10 +1,5 @@
 package cs451;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.List;
 import java.lang.System;
 
@@ -13,19 +8,25 @@ public class Main {
 
     static Receiver receiver;
     static Sender sender;
-    static boolean hasWritten = false;
 
     private static void handleSignal() {
         //immediately stop network packet processing
         System.out.println("Immediately stopping network packet processing.");
 
+        if (receiver != null) receiver.stop();
+        if(sender != null) sender.stop_message();
+
         //write/flush output file if necessary
         System.out.println("Writing output.");
 
         //finish the program when asked to finish
-        if(receiver != null){
+        System.out.println("A");
+        if(receiver != null) {
+            System.out.println("B");
+            receiver.write();
             receiver.close();
         }
+
 
         if(sender != null){
             sender.write();
@@ -82,9 +83,6 @@ public class Main {
 
         // After a process finishes broadcasting,
         // it waits forever for the delivery of messages.
-        if(sender != null){
-            sender.write();
-        }
 
         while (true) {
             // Sleep for 1 hour
@@ -95,9 +93,11 @@ public class Main {
 
     private static void initialize(Parser parser){
 
-        String config_path = parser.config();
         int index_receive = parser.getIndexReceive();
         List<Host> hosts = parser.hosts();
+        int[] ports = hosts.stream()
+                .mapToInt(Host::getPort)
+                .toArray();
 
         if(parser.myId() == index_receive){
             // Receiver
@@ -105,7 +105,8 @@ public class Main {
             Host hosts_receiver = hosts.get(index_receive - 1);
             int port = hosts_receiver.getPort();
             String outputFileName = parser.output();
-            receiver = new Receiver(port, outputFileName);
+            receiver = new Receiver(port, outputFileName, ports);
+            receiver.start();
         }else{
             int number_message = parser.getNumberMessage();
 
@@ -113,25 +114,26 @@ public class Main {
             // Create messages and destinations
             int[] messages = new int[number_message];
 
-            int[] destination_id = new int[number_message];
             String[] destination_ip = new String[number_message];
             int[] destination_port = new int[number_message];
+            Host host_sender = hosts.get(parser.myId()-1);
 
             for (int i = 0; i < number_message; i++) {
                 messages[i] = i+1;
-                int destination_num = index_receive;
 
-                Host hosts_receiver = hosts.get(destination_num-1);
+                Host hosts_receiver = hosts.get(index_receive - 1);
+
 
                 // I hop the id  is equal to the id number in the list
-                assert destination_num == hosts_receiver.getId();
+                assert index_receive == hosts_receiver.getId();
 
-                destination_id[i] = hosts_receiver.getId();
                 destination_ip[i] = hosts_receiver.getIp();
                 destination_port[i] = hosts_receiver.getPort();
             }
 
             String outputFileName = parser.output();
+            boolean[] message_received = new boolean[number_message];
+            int port_sender = host_sender.getPort();
 
             sender = new Sender(
                     number_message,
@@ -139,12 +141,19 @@ public class Main {
                     parser.myId(),
                     destination_ip,
                     destination_port,
-                    outputFileName
-                    );
+                    outputFileName,
+                    message_received
+            );
 
+            Sender_ack senderAck = new Sender_ack(
+                    port_sender,
+                    message_received,
+                    number_message
+            );
+
+            //Send message
             sender.start();
-            sender.close();
-
+            senderAck.start();
         }
     }
 }

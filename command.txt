@@ -8,3 +8,5 @@ killall -9 8234
 
 setxkbmap ch
 sudo fuser -k 11002/udp
+
+./stress.py perfect -r ../template_java/run.sh -l ../prof_test/ -p 3 -m 10
