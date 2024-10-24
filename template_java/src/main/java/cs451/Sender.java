@@ -18,12 +18,11 @@ Will use Udp_sender to send message 1 by one.
 // https://www.geeksforgeeks.org/multithreading-in-java/
 public class Sender extends Thread {
     private final int number_message;
-    private final int[] list_message_num;
     private final int id_sender;
 
     // 1 address is ip and port
-    private final String[] list_ip;
-    private final int[] list_port;
+    private final String list_ip;
+    private final int list_port;
 
     private final boolean[] list_received;
     private final boolean[] list_send;
@@ -31,17 +30,15 @@ public class Sender extends Thread {
     private final Udp_sender udpSender;
     private final FileWriter fileWriter;
     private boolean isRunning = true;
-    private int last_finish_check_message = 0;
+    private int last_check_message = 0;
 
     public Sender(int number_message,
-                  int[] messages,
                   int id_sender,
-                  String[] ips,
-                  int[] ports,
+                  String ips,
+                  int ports,
                   String fileName,
                   boolean[] list_received){
         this.number_message = number_message;
-        this.list_message_num = messages;
         this.list_ip = ips;
         this.list_port = ports;
         this.id_sender = id_sender;
@@ -72,8 +69,8 @@ public class Sender extends Thread {
 
         // Horrible way to pass an int by reference. to have 2 outputs.
         // amount
-        int[] amountNotReceived = new int[1];
-        int[] notReceived = notReceivedMsg(amountNotReceived);
+        int[] amountNotReceived = {number_message};
+        int[] notReceived = init_list_notReceived();
         while (amountNotReceived[0] != 0 && isRunning){
             send(notReceived, amountNotReceived[0]);
             notReceived = notReceivedMsg(amountNotReceived);
@@ -88,19 +85,30 @@ public class Sender extends Thread {
 
         int[] notSend = new int[number_message];
         int j = 0;
+        int index=0;
         for (int i = 0; i < number_message; i++) {
-            int index = (i + last_finish_check_message) % number_message;
-            if(! list_received[i]){
-                notSend[j] = i;
+            index = (last_check_message + i) % number_message;
+            if(! list_received[index]){
+                notSend[j] = index;
                 j++;
-                // Don't go through all the list if
-                if(j >= 8*100000_000) {
-                    last_finish_check_message = index;
+
+                if(j >= 10000_000*MAX_MESSAGE_PER_PACKET){
+                    // We don't need more than 10'000 messages in the list.
                     break;
                 }
             }
         }
+        last_check_message = index;
         amountNotReceived[0] = j;
+        return notSend;
+    }
+
+    private int[] init_list_notReceived(){
+
+        int[] notSend = new int[number_message];
+        for (int i = 0; i < number_message; i++) {
+            notSend[i] = i;
+        }
         return notSend;
     }
 
@@ -111,15 +119,13 @@ public class Sender extends Thread {
             int[] message_send = new int[MAX_MESSAGE_PER_PACKET];
             Arrays.fill(message_send, -1);
 
-            String ip = list_ip[i];
-            int port = list_port[i];
-
             // Create message :
             // "id m1"
             StringBuilder sb = new StringBuilder();
             sb.append(id_sender);
             sb.append(SEPARATOR);
-            sb.append(list_message_num[messages[i]]);
+            int message = messages[i] + 1;
+            sb.append(message);
             message_send[0] = i;
             list_send[message_send[0]] = true;
 
@@ -130,14 +136,16 @@ public class Sender extends Thread {
 
                 if(index >= number_message) break;
 
+                /*
+                When dealing with multiple destination
                 if(! ip.equals(list_ip[index])) break;
-
                 if(port != list_port[index]) break;
+                 */
 
                 // We can stack multiple message next to each other.
                 sb.append(SEPARATOR_C);
-                sb.append(list_message_num[messages[index]]);
-
+                int message2 = messages[index]+1;
+                sb.append(message2);
 
                 message_send[j+1] = index;
                 list_send[index] = true;
@@ -152,7 +160,7 @@ public class Sender extends Thread {
                 System.out.println("Break Sender");
                 return;
             }
-            udpSender.send(composed_message, ip, port);
+            udpSender.send(composed_message, list_ip, list_port);
             //System.out.println("Received : " + received);
             i++;
         }

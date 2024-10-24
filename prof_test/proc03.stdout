@@ -1,6 +1,6 @@
-My PID: 5947
+My PID: 8061
 
-From a new terminal type `kill -SIGINT 5947` or `kill -SIGTERM 5947` to stop processing packets
+From a new terminal type `kill -SIGINT 8061` or `kill -SIGTERM 8061` to stop processing packets
 
 My ID: 3
 
@@ -30,14 +30,14 @@ Path to config:
 Doing some initialization
 
 Udp_receiver port 11003
+Start run
 Broadcasting and delivering messages...
 
-Start run
 output parser:/home/dcl/Distr_algo/prof_test/proc03.output
 
 Immediately stopping network packet processing.
 Writing output.
+Break Sender
 A
 Writing
 
-Break Sender

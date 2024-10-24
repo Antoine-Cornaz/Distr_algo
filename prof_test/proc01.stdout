@@ -1,6 +1,6 @@
-My PID: 5945
+My PID: 8058
 
-From a new terminal type `kill -SIGINT 5945` or `kill -SIGTERM 5945` to stop processing packets
+From a new terminal type `kill -SIGINT 8058` or `kill -SIGTERM 8058` to stop processing packets
 
 My ID: 1
 
@@ -33,15 +33,15 @@ I'm the receiver
 
 Udp_receiver port 11001
 Immediately stopping network packet processing.
-Break receiver
-Broadcasting and delivering messages...
-
-output parser:/home/dcl/Distr_algo/prof_test/proc01.output
-
-Stop size message seen 153472
+Stop size message seen 1828000
 
 Writing output.
 A
 B
 Writing
+
+Break receiver
+Broadcasting and delivering messages...
+
+output parser:/home/dcl/Distr_algo/prof_test/proc01.output
 

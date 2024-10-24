@@ -111,25 +111,11 @@ public class Main {
             int number_message = parser.getNumberMessage();
 
 
-            // Create messages and destinations
-            int[] messages = new int[number_message];
 
-            String[] destination_ip = new String[number_message];
-            int[] destination_port = new int[number_message];
             Host host_sender = hosts.get(parser.myId()-1);
-
-            for (int i = 0; i < number_message; i++) {
-                messages[i] = i+1;
-
-                Host hosts_receiver = hosts.get(index_receive - 1);
-
-
-                // I hop the id  is equal to the id number in the list
-                assert index_receive == hosts_receiver.getId();
-
-                destination_ip[i] = hosts_receiver.getIp();
-                destination_port[i] = hosts_receiver.getPort();
-            }
+            Host hosts_receiver = hosts.get(index_receive - 1);
+            String destination_ip = hosts_receiver.getIp();
+            int destination_port = hosts_receiver.getPort();
 
             String outputFileName = parser.output();
             boolean[] message_received = new boolean[number_message];
@@ -137,7 +123,6 @@ public class Main {
 
             sender = new Sender(
                     number_message,
-                    messages,
                     parser.myId(),
                     destination_ip,
                     destination_port,
