@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 100000  #Change both here and in call
+NUMBER_MESSAGES = 10_000_000
 
 
 def main():

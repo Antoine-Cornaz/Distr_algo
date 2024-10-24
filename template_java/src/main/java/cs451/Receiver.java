@@ -12,10 +12,11 @@ import static cs451.Constants.SEPARATOR_C;
 
 public class Receiver {
 
-    Udp_receiver udpReceiver;
-    FileWriter fileWriter;
-    Set<IdMessage> messageSeenSet;
-    boolean running = true;
+    private final Udp_receiver udpReceiver;
+    private FileWriter fileWriter;
+    private final Set<IdMessage> messageSeenSet;
+    private boolean running = true;
+    private final int[] ports;
     public Receiver(int port, String outputFileName, int[] ports){
         // Create the file to write.
         try {
@@ -28,8 +29,10 @@ public class Receiver {
         messageSeenSet = new HashSet<>();
         udpReceiver = new Udp_receiver(port);
 
+        this.ports = ports;
+    }
 
-
+    public void start(){
         while (running){
             String received = udpReceiver.listen_message();
 
@@ -41,36 +44,44 @@ public class Receiver {
 
             int port_send_back = ports[Integer.parseInt(split_received[0]) -1];
             if(!running){
-                break;
+                System.out.println("Break receiver");
+                return;
             }
             udpReceiver.sendBack(port_send_back);
 
-            try {
-                for (int i = 0; i < amount_message; i++) {
-                    int message_number = Integer.parseInt(split_received[i + 1].trim());
+            for (int i = 0; i < amount_message; i++) {
+                int message_number = Integer.parseInt(split_received[i + 1].trim());
 
-                    int id = Integer.parseInt(split_received[0]);
-                    IdMessage idMessage = new IdMessage(id, message_number);
-
-                    if (!messageSeenSet.contains(idMessage)){
-                        messageSeenSet.add(idMessage);
-
-                        if(running) {
-                            String message = "d " + split_received[0] + " " + message_number + "\n";
-                            fileWriter.write(message);
-                        }
-                    }
+                int id = Integer.parseInt(split_received[0]);
+                IdMessage idMessage = new IdMessage(id, message_number);
+                if(!running){
+                    System.out.println("Break receiver 2");
+                    return;
                 }
-
-                fileWriter.flush();
-            }catch (IOException e){
-                System.out.println(e);
+                messageSeenSet.add(idMessage);
             }
+        }
+    }
+
+    public void write() {
+        System.out.println("Writing\n");
+
+        try {
+            for (IdMessage idMessage : messageSeenSet) {
+                String message = "d " + idMessage.getId() + " " + idMessage.getMessageNumber() + "\n";
+
+                fileWriter.write(message);
+            }
+
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     public void stop(){
         running = false;
+        System.out.println("Stop size message seen " + messageSeenSet.size() + "\n");
     }
 
     public void close(){

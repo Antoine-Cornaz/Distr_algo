@@ -20,7 +20,12 @@ public class Main {
         System.out.println("Writing output.");
 
         //finish the program when asked to finish
-        if(receiver != null) receiver.close();
+        System.out.println("A");
+        if(receiver != null) {
+            System.out.println("B");
+            receiver.write();
+            receiver.close();
+        }
 
 
         if(sender != null){
@@ -101,6 +106,7 @@ public class Main {
             int port = hosts_receiver.getPort();
             String outputFileName = parser.output();
             receiver = new Receiver(port, outputFileName, ports);
+            receiver.start();
         }else{
             int number_message = parser.getNumberMessage();
 
@@ -136,9 +142,8 @@ public class Main {
                     destination_ip,
                     destination_port,
                     outputFileName,
-                    message_received,
-                    port_sender
-                    );
+                    message_received
+            );
 
             Sender_ack senderAck = new Sender_ack(
                     port_sender,

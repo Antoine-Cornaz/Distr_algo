@@ -30,6 +30,8 @@ public class Sender extends Thread {
 
     private final Udp_sender udpSender;
     private final FileWriter fileWriter;
+    private boolean isRunning = true;
+    private int last_finish_check_message = 0;
 
     public Sender(int number_message,
                   int[] messages,
@@ -37,8 +39,7 @@ public class Sender extends Thread {
                   String[] ips,
                   int[] ports,
                   String fileName,
-                  boolean[] list_received,
-                  int port_sender){
+                  boolean[] list_received){
         this.number_message = number_message;
         this.list_message_num = messages;
         this.list_ip = ips;
@@ -73,12 +74,10 @@ public class Sender extends Thread {
         // amount
         int[] amountNotReceived = new int[1];
         int[] notReceived = notReceivedMsg(amountNotReceived);
-        while (amountNotReceived[0] != 0){
+        while (amountNotReceived[0] != 0 && isRunning){
             send(notReceived, amountNotReceived[0]);
             notReceived = notReceivedMsg(amountNotReceived);
-            System.out.println("amount not received " + amountNotReceived[0]);
         }
-        System.out.println("all messages successfully sent");
     }
 
     /*
@@ -86,12 +85,19 @@ public class Sender extends Thread {
     Return 1: first_message_not_send, 2: second_message_not_send, ...
      */
     private int[] notReceivedMsg(int[] amountNotReceived){
+
         int[] notSend = new int[number_message];
         int j = 0;
         for (int i = 0; i < number_message; i++) {
+            int index = (i + last_finish_check_message) % number_message;
             if(! list_received[i]){
                 notSend[j] = i;
                 j++;
+                // Don't go through all the list if
+                if(j >= 8*100000_000) {
+                    last_finish_check_message = index;
+                    break;
+                }
             }
         }
         amountNotReceived[0] = j;
@@ -142,7 +148,10 @@ public class Sender extends Thread {
             // Add end of message
             String composed_message = sb.toString();
             //System.out.println("composed_message $" + composed_message+ "$");
-
+            if(!isRunning) {
+                System.out.println("Break Sender");
+                return;
+            }
             udpSender.send(composed_message, ip, port);
             //System.out.println("Received : " + received);
             i++;
@@ -170,7 +179,7 @@ public class Sender extends Thread {
     }
 
     public void stop_message(){
-
+        isRunning = false;
     }
 
     public void close(){
