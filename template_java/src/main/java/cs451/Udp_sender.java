@@ -14,10 +14,7 @@ https://www.baeldung.com/udp-in-java
  */
 
 public class Udp_sender {
-    private DatagramSocket socket;
-    private InetAddress address;
-
-    private byte[] buf;
+    private final DatagramSocket socket;
 
     public Udp_sender() {
         try {
@@ -33,8 +30,8 @@ public class Udp_sender {
         DatagramPacket packet;
         try {
             int length_msg = msg.length();
-            buf = msg.getBytes();
-            address = InetAddress.getByName(ip);
+            byte[] buf = msg.getBytes();
+            InetAddress address = InetAddress.getByName(ip);
 
                packet = new DatagramPacket(buf, length_msg, address, port);
 

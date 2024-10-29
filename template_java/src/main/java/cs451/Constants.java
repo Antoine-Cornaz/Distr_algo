@@ -28,4 +28,6 @@ public class Constants {
     public static final char SEPARATOR_C = ',';
 
     public static final char NO_CHAR = ' ';
+
+    public static final int MAX_SIZE_MESSAGE = 128;
 }

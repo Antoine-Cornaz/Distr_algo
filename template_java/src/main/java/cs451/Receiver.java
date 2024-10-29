@@ -81,7 +81,7 @@ public class Receiver {
 
     public void stop(){
         running = false;
-        System.out.println("Stop size message seen " + messageSeenSet.size() + "\n");
+        //System.out.println("Stop size message seen " + messageSeenSet.size() + "\n");
     }
 
     public void close(){

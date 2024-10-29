@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import static cs451.Constants.MAX_SIZE_MESSAGE;
 import static cs451.Constants.NO_CHAR;
 
 /*
@@ -18,7 +19,7 @@ https://www.baeldung.com/udp-in-java
 public class Udp_receiver extends Thread {
 
     private final DatagramSocket socket;
-    private final byte[] buf = new byte[256];
+    private final byte[] buf = new byte[MAX_SIZE_MESSAGE];
     private DatagramPacket packet;
 
     public Udp_receiver(int port)  {

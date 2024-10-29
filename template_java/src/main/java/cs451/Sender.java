@@ -92,10 +92,10 @@ public class Sender extends Thread {
                 notSend[j] = index;
                 j++;
 
-                if(j >= 10000_000*MAX_MESSAGE_PER_PACKET){
+                /*if(j >= 10000_000*MAX_MESSAGE_PER_PACKET){
                     // We don't need more than 10'000 messages in the list.
                     break;
-                }
+                }*/
             }
         }
         last_check_message = index;
