@@ -22,44 +22,62 @@ public class Receiver {
         try {
             fileWriter = new FileWriter(outputFileName);
         }catch (IOException e){
-            System.out.println(e);
+            System.err.println("Exception in receiver, init filewriter: " + e.getMessage());
         }
 
 
         messageSeenSet = new HashSet<>();
-        udpReceiver = new Udp_receiver(port);
+        Udp_receiver tmp_receiver = null;
+        while (tmp_receiver == null) {
+            // We really need the receiver to be successfully
+            try {
+                tmp_receiver = new Udp_receiver(port);
+            } catch (Exception e) {
+                System.err.println("Exception in receiver, init: " + e.getMessage());
+                tmp_receiver = null;
+            }
+        }
+
+        udpReceiver = tmp_receiver;
+
 
         this.ports = ports;
     }
 
     public void start(){
-        while (running){
-            String received = udpReceiver.listen_message();
+        try {
+            while (running) {
+
+                String received = udpReceiver.listen_message();
 
 
-            //same number of message as number of ','
-            int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
-            // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
-            String[] split_received = received.split(SEPARATOR);
+                //same number of message as number of ','
+                int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
+                // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
+                String[] split_received = received.split(SEPARATOR);
 
-            int port_send_back = ports[Integer.parseInt(split_received[0]) -1];
-            if(!running){
-                System.out.println("Break receiver");
-                return;
-            }
-            udpReceiver.sendBack(port_send_back);
-
-            for (int i = 0; i < amount_message; i++) {
-                int message_number = Integer.parseInt(split_received[i + 1].trim());
-
-                int id = Integer.parseInt(split_received[0]);
-                IdMessage idMessage = new IdMessage(id, message_number);
-                if(!running){
-                    System.out.println("Break receiver 2");
+                int port_send_back = ports[Integer.parseInt(split_received[0]) - 1];
+                if (!running) {
+                    System.out.println("Break receiver");
                     return;
                 }
-                messageSeenSet.add(idMessage);
+                udpReceiver.sendBack(port_send_back);
+
+                for (int i = 0; i < amount_message; i++) {
+                    int message_number = Integer.parseInt(split_received[i + 1].trim());
+
+                    int id = Integer.parseInt(split_received[0]);
+                    IdMessage idMessage = new IdMessage(id, message_number);
+                    if (!running) {
+                        System.out.println("Break receiver 2");
+                        return;
+                    }
+                    messageSeenSet.add(idMessage);
+                }
             }
+        } catch (Exception e){
+            System.err.println("Exception in receiver, start: " + e.getMessage());
+            start();
         }
     }
 
@@ -75,7 +93,7 @@ public class Receiver {
 
             fileWriter.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Exception in receiver, write: " + e.getMessage());
         }
     }
 
@@ -88,7 +106,7 @@ public class Receiver {
         try {
             fileWriter.close();
         }catch (IOException e){
-            System.out.println(e);
+            System.err.println("Exception in receiver, close: " + e.getMessage());
         }
         udpReceiver.close();
     }

@@ -47,7 +47,15 @@ public class Sender extends Thread {
         this.list_received = list_received;
         list_send = new boolean[number_message];
 
-        udpSender = new Udp_sender();
+        Udp_sender tmp_sender = null;
+        while (tmp_sender == null){
+            try {
+                tmp_sender = new Udp_sender();
+            }catch (Exception e) {
+                System.err.println("Exception in sender, init: " + e.getMessage());
+            }
+        }
+        udpSender = tmp_sender;
         //udpReceiver = new Udp_receiver(port_sender);
 
         try {
@@ -175,14 +183,14 @@ public class Sender extends Thread {
                 try {
                     fileWriter.write(message);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("Exception in sender, write: " + e.getMessage());
                 }
             }
         }
         try {
             fileWriter.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Exception in receiver, write2: " + e.getMessage());
         }
     }
 

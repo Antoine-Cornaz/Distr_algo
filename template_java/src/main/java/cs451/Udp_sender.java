@@ -39,7 +39,7 @@ public class Udp_sender {
             //System.out.println("udp_sender: message sent " + msg);
             //socket.receive(packet);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Exception in sender, send: " + e.getMessage());
         }
     }
 

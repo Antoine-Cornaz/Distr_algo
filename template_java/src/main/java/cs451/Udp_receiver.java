@@ -27,6 +27,7 @@ public class Udp_receiver extends Thread {
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {
+            System.err.println("Exception in udp_receiver, init: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -40,7 +41,8 @@ public class Udp_receiver extends Thread {
         try {
             socket.receive(packet);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Exception in udp_receiver, listen 1: " + e.getMessage());
+            return "";
         }
 
         InetAddress address = packet.getAddress();
@@ -58,7 +60,7 @@ public class Udp_receiver extends Thread {
             packet = new DatagramPacket(packet.getData(), packet.getLength(), address, port);
             socket.send(packet);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Exception in udp_receiver, send_back: " + e.getMessage());
         }
     }
 

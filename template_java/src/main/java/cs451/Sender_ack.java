@@ -38,7 +38,7 @@ public class Sender_ack extends Thread{
                     try {
                         message_number = Integer.parseInt(split_received[j+1].trim());
                     }catch (Exception e){
-                        System.out.println("sender_ack message break down. Some part are missing :(");
+                        System.err.println("sender_ack message break down. Some part are missing :( " + e.getMessage());
                         break;
                     }
 
