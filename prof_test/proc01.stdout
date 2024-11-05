@@ -1,0 +1,44 @@
+My PID: 2317
+
+From a new terminal type `kill -SIGINT 2317` or `kill -SIGTERM 2317` to stop processing packets
+
+My ID: 1
+
+List of resolved hosts is:
+==========================
+1
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11001
+
+2
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11002
+
+3
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11003
+
+
+Path to output:
+===============
+/home/dcl/Distr_algo/prof_test/proc01.output
+
+Path to config:
+===============
+../prof_test/config
+
+Doing some initialization
+
+I'm the receiver
+
+Udp_receiver port 11001
+Immediately stopping network packet processing.
+Writing output.
+A
+B
+Writing
+
+Broadcasting and delivering messages...
+
+output parser:/home/dcl/Distr_algo/prof_test/proc01.output
+
