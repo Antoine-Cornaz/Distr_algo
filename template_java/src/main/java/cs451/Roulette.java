@@ -1,6 +1,6 @@
 package cs451;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
@@ -8,21 +8,23 @@ import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
 public class Roulette {
     private int min_value;
     private final int max_value;
-    private final int process_id;
+    private final int peer_id;
     private final int batch_size;
+    private final int self_id;
     
     private final byte[] states;
 
-    public final byte SEND = 0;
-    public final byte SENT = 1;
-    public final byte TO_CONFIRM = 2;
-    public final byte CONFIRMED = 3;
+    public static final byte SEND = 0;
+    public static final byte SENT = 1;
+    public static final byte TO_CONFIRM = 2;
+    public static final byte CONFIRMED = 3;
     
-    public Roulette(int min_value, int max_value, int process_id, int batch_size){
+    public Roulette(int min_value, int max_value, int peer_id, int batch_size, int self_id){
         this.min_value = min_value; // Included
         this.max_value = max_value; // Not included
-        this.process_id = process_id;
+        this.peer_id = peer_id;
         this.batch_size = batch_size;
+        this.self_id = self_id;
 
         this.states = new byte[batch_size];
     }
@@ -65,13 +67,7 @@ public class Roulette {
         int max = Math.min(batch_size, max_value - min_value);
 
         while(i < max) {
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(type_message);
-            sb.append(Constants.SEPARATOR_C);
-            sb.append(process_id);
-            sb.append(Constants.SEPARATOR_C);
-            sb.append(process_id);
+            int[] message_number = new int[8];
 
             int j = 0;
             while (j < MAX_MESSAGE_PER_PACKET && i < max) {
@@ -81,20 +77,30 @@ public class Roulette {
                     index = (min_value + i) % batch_size;
                 }
                 if (i >= max) break;
-                sb.append(Constants.SEPARATOR_C);
-                sb.append(min_value + i);
+
+                message_number[j] = min_value + i;
 
                 i++;
                 j++;
             }
 
             if (j == 0) return;
+            int[] copyArray = Arrays.copyOf(message_number, j);
 
-            String message_content = sb.toString();
-
-            Message message = new Message(process_id, message_content);
+            Message message = new Message(peer_id, type_message, self_id, self_id, copyArray);
             messageList.add(message);
         }
+    }
+
+    public void print_state(){
+        for (int i = 0; i < batch_size; i++) {
+            if (states[(min_value + i) %batch_size] != SEND){
+                int place = min_value + i;
+                int state = states[(min_value + i) %batch_size];
+                System.out.print(place + "," + state + "\n");
+            }
+        }
+        System.out.println();
     }
 
     /*
