@@ -31,6 +31,7 @@ public class Messager {
                 setA.add(message);
                 for (int message_number : message.getMessage_numbers()){
                     roulettes[message.getId()].increase_value(message_number, Roulette.SENT);
+                    update_to_confirm_if_majority(message_number);
                     System.out.println("message recu A");
                 }
                 break;
@@ -69,39 +70,48 @@ public class Messager {
         return messageList;
     }
 
-    public static void main (String[] args) {
+    public void update_to_confirm_if_majority (int msg_number){
+        int counter_receive = 0;
 
-        //TODO debug Messager
-
-        Messager messager = new Messager(10, 3, 20);
-
-        ArrayList<Message> messages = messager.getMessages(new ArrayList<>());
-        for(Message m: messages){
-            //System.out.println(m);
+        for (int i = 0; i < number_processes; i++) {
+            byte state = roulettes[i].getState(msg_number);
+            if (state == Roulette.SENT) counter_receive++;
+            // If already confirmation stage doesn't need to update
+            if (state > Roulette.SENT) return;
         }
 
-        String content = "A,5,5,1,2,3,4,7,8,9,10";
-        for (int i = 0; i < 20; i++) {
-            Message m = new Message(3, content);
-            messager.receive(m);
-        }
+        if (counter_receive > number_processes/2){
+            // 50% < received
 
-        content = "B,7,7,1,2,3,4,7,8,9,10";
-        for (int i = 0; i < 20; i++) {
-            Message m = new Message(3, content);
-            messager.receive(m);
-        }
-
-        for (int i = 0; i < 10; i++) {
-            System.out.println("i " + i);
-            messager.roulettes[i].print_state();
-        }
-
-        messages = messager.getMessages(new ArrayList<>());
-
-        for(Message m: messages){
-            System.out.println(m);
+            for (int i = 0; i < number_processes; i++) {
+                roulettes[i].increase_value(msg_number, Roulette.TO_CONFIRM);
+            }
         }
 
     }
+
+    /*
+    public static void main (String[] args) {
+
+        int self_idea = 3;
+        Messager messager = new Messager(3, self_idea, 20);
+
+        int[] array = {1,2,3,4,7,8,9,0};
+        Message m = new Message(2, 'A', self_idea, self_idea, array);
+        Message m2 = new Message(1, 'A', self_idea, self_idea, array);
+        messager.receive(m);
+        messager.receive(m2);
+
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Message> messages = messager.getMessages(list);
+
+        for (int i = 0; i < 3; i++) {
+            messager.roulettes[i].print_state();
+        }
+
+        for (Message m3: messages){
+            System.out.println(m3);
+        }
+    }
+     */
 }

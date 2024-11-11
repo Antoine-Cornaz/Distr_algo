@@ -1,5 +1,6 @@
 package cs451;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -92,6 +93,17 @@ public class Roulette {
         }
     }
 
+    public byte getState(int msg_number){
+        assert 0 <= msg_number;
+        assert msg_number < max_value;
+        assert msg_number < min_value + batch_size;
+
+        if (msg_number < min_value) return CONFIRMED; // 3
+        if (min_value + batch_size <= msg_number) return SEND;// 0
+
+        return states[msg_number % batch_size];
+    }
+
     public void print_state(){
         for (int i = 0; i < batch_size; i++) {
             if (states[(min_value + i) %batch_size] != SEND){
@@ -103,10 +115,10 @@ public class Roulette {
         System.out.println();
     }
 
-    /*
+
     public static void main (String[] args) {
         //int min_value, int max_value, int process_id, int batch_size
-        Roulette roulette = new Roulette(0, 12, 3, 50);
+        Roulette roulette = new Roulette(0, 12, 3, 50, 7);
 
         ArrayList<Message> list = new ArrayList<>();
         roulette.add_messages(list);
@@ -117,7 +129,7 @@ public class Roulette {
 
         System.out.println("\n\n\n --------------------------- \n\n\n");
 
-        roulette = new Roulette(10, 47, 3, 20);
+        roulette = new Roulette(10, 47, 3, 20, 7);
         roulette.increase_value(10, (byte) 1);
         roulette.increase_value(10, (byte) 0);// Should do nothing
         roulette.increase_value(11, (byte) 2);
@@ -137,7 +149,7 @@ public class Roulette {
 
         System.out.println("\n\n\n --------------------------- \n\n\n");
 
-        roulette = new Roulette(40, 80, 3, 35);
+        roulette = new Roulette(40, 80, 3, 35, 7);
         roulette.increase_value(40, (byte) 0);
         roulette.increase_value(41, (byte) 2);
         roulette.increase_value(43, (byte) 2);
@@ -152,5 +164,5 @@ public class Roulette {
             System.out.println("id " + m.getId() + " content " + m.getContent());
         }
     }
-     */
+
 }
