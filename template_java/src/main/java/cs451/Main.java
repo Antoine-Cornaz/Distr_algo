@@ -3,6 +3,8 @@ package cs451;
 import java.util.List;
 import java.lang.System;
 
+import static cs451.Constants.INITIAL_PING_TIME_MS;
+
 
 public class Main {
 
@@ -93,52 +95,64 @@ public class Main {
 
     private static void initialize(Parser parser){
 
-        int index_receive = parser.getIndexReceive();
+
         List<Host> hosts = parser.hosts();
-        int[] ports = hosts.stream()
-                .mapToInt(Host::getPort)
-                .toArray();
+        int numberProcess = hosts.size();
+        int[] list_port = new int[numberProcess];
+        String[] list_ip = new String[numberProcess];
 
-        if(parser.myId() == index_receive){
-            // Receiver
-            System.out.println("I'm the receiver\n");
-            Host hosts_receiver = hosts.get(index_receive - 1);
-            int port = hosts_receiver.getPort();
-            String outputFileName = parser.output();
-            receiver = new Receiver(port, outputFileName, ports);
-            receiver.start();
-        }else{
-            int number_message = parser.getNumberMessage();
-
-
-
-            Host host_sender = hosts.get(parser.myId()-1);
-            Host hosts_receiver = hosts.get(index_receive - 1);
-            String destination_ip = hosts_receiver.getIp();
-            int destination_port = hosts_receiver.getPort();
-
-            String outputFileName = parser.output();
-            boolean[] message_received = new boolean[number_message];
-            int port_sender = host_sender.getPort();
-
-            sender = new Sender(
-                    number_message,
-                    parser.myId(),
-                    destination_ip,
-                    destination_port,
-                    outputFileName,
-                    message_received
-            );
-
-            Sender_ack senderAck = new Sender_ack(
-                    port_sender,
-                    message_received,
-                    number_message
-            );
-
-            //Send message
-            sender.start();
-            senderAck.start();
+        for (int i = 0; i < numberProcess; i++) {
+            list_port[i] = hosts.get(i).getPort();
+            list_ip[i] = hosts.get(i).getIp();
         }
+
+        int self_id = parser.myId();
+        int number_message = parser.getNumberMessage();
+        Messager messager = new Messager(numberProcess, self_id, number_message);
+        Detector detector = new Detector(numberProcess, self_id, INITIAL_PING_TIME_MS);
+        String fileName = parser.output();
+
+        // Sender
+        int number_message = parser.getNumberMessage();
+
+        Host host_sender = hosts.get(parser.myId()-1);
+        Host hosts_receiver = hosts.get(index_receive - 1);
+        String destination_ip = hosts_receiver.getIp();
+        int destination_port = hosts_receiver.getPort();
+
+        String outputFileName = parser.output();
+        boolean[] message_received = new boolean[number_message];
+        int port_sender = host_sender.getPort();
+
+        sender = new Sender(
+                list_port,
+                list_ip,
+                self_id,
+                number_message,
+                messager,
+                detector,
+                outputFileName
+        );
+
+        Sender_ack senderAck = new Sender_ack(
+                port_sender,
+                message_received,
+                number_message
+        );
+
+        //Send message
+        sender.start();
+        senderAck.start();
+
+        // Receiver
+        System.out.println("I'm the receiver\n");
+        Host hosts_receiver = hosts.get(index_receive - 1);
+        int port = hosts_receiver.getPort();
+        String outputFileName = parser.output();
+        receiver = new Receiver(port, outputFileName, list_port);
+        receiver.start();
+
+
+
     }
 }

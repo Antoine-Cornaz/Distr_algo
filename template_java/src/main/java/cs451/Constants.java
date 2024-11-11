@@ -33,4 +33,6 @@ public class Constants {
 
     public static final int BATCH_SIZE = 800;
 
+    public static final int INITIAL_PING_TIME_MS = 1000;
+
 }
