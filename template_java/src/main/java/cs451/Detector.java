@@ -46,6 +46,7 @@ public class Detector {
     public void update(int process_number){
         lock.lock();
         last_message_time[process_number] = System.currentTimeMillis();
+        //System.out.print("u" +process_number+",");
         lock.unlock();
     }
 
@@ -67,8 +68,7 @@ public class Detector {
             if (is_dead && !was_dead[i]) {
                 new_dead.add(i);
                 was_dead[i] = true;
-            }
-            if (!is_dead && was_dead[i]) {
+            } else if (!is_dead && was_dead[i]) {
                 new_resurect.add(i);
                 was_dead[i] = false;
 
@@ -90,56 +90,56 @@ public class Detector {
         return new_resurect;
     }
 
-    /*
+
     public static void main (String[] args) throws InterruptedException {
         //int min_value, int max_value, int process_id, int batch_size
 
         Detector detector = new Detector(10, 3, 100);
 
-        detector.update_time();
-
-        for (Integer d : detector.get_new_dead()) {
-            System.out.println("dead :" + d);
-        }
-
-
-        for (Integer d : detector.get_new_resurect()) {
-            System.out.println("resurect :" + d);
-        }
+        detector.printNews();// Nothing
 
         System.out.println("Sleep 1 second");
         TimeUnit.SECONDS.sleep(1);
 
+        System.out.println("update 7");
         detector.update(7);
 
-        detector.update_time();
-
-        for (Integer d : detector.get_new_dead()) {
-            System.out.println("dead :" + d);
-        }
-
-
-        for (Integer d : detector.get_new_resurect()) {
-            System.out.println("resurect :" + d);
-        }
+        // all dead except 7
+        detector.printNews();
 
         TimeUnit.SECONDS.sleep(1);
-        TimeUnit.SECONDS.sleep(1);
 
+        System.out.println("update 5");
         detector.update(5);
-        detector.update_time();
 
 
-        for (Integer d : detector.get_new_dead()) {
+        detector.printNews();
+
+        TimeUnit.SECONDS.sleep(1);
+
+        for (int i = 0; i < 10; i++) {
+            System.out.println("update 2");
+            detector.update(2);
+            System.out.println("wait 1 sec");
+            TimeUnit.SECONDS.sleep(1);
+            detector.printNews();
+        }
+    }
+
+    private void printNews(){
+        System.out.println("printNews");
+        update_time();
+
+
+        for (Integer d : get_new_dead()) {
             System.out.println("dead :" + d);
         }
 
 
-        for (Integer d : detector.get_new_resurect()) {
+        for (Integer d : get_new_resurect()) {
             System.out.println("resurect :" + d);
         }
-
-
+        System.out.println();
     }
-     */
+
 }

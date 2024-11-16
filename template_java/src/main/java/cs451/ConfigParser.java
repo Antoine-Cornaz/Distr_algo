@@ -38,7 +38,7 @@ public class ConfigParser {
             //System.out.println("data " + data);
             String[] data_split = data.split(" ");
             number_message = Integer.parseInt(data_split[0]);
-            index_receive = Integer.parseInt(data_split[1]);
+            //index_receive = Integer.parseInt(data_split[1]);
             //System.out.println("number message " + number_message);
             //System.out.println("index receive " + index_receive);
 

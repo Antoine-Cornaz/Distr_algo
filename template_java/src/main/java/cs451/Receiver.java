@@ -6,18 +6,20 @@ import java.io.IOException;  // Import the IOException class to handle errors
 import java.util.HashSet;
 import java.util.Set;
 
-import static cs451.Constants.SEPARATOR;
-import static cs451.Constants.SEPARATOR_C;
 
-
-public class Receiver {
+public class Receiver extends Thread{
 
     private final Udp_receiver udpReceiver;
     private FileWriter fileWriter;
     private final Set<IdMessage> messageSeenSet;
-    private boolean running = true;
-    private final int[] ports;
-    public Receiver(int port, String outputFileName, int[] ports){
+    private boolean running = false;
+    private final int[] list_ports;
+    private final int self_id;
+    private final Messager messager;
+    private final Detector detector;
+    //private final Sender_ack senderAck;
+
+    public Receiver(String outputFileName, int[] list_ports, int self_id, Messager messager, Detector detector){
         // Create the file to write.
         try {
             fileWriter = new FileWriter(outputFileName);
@@ -25,59 +27,38 @@ public class Receiver {
             System.err.println("Exception in receiver, init filewriter: " + e.getMessage());
         }
 
+        int self_port = list_ports[self_id];
 
         messageSeenSet = new HashSet<>();
-        Udp_receiver tmp_receiver = null;
-        while (tmp_receiver == null) {
-            // We really need the receiver to be successfully
-            try {
-                tmp_receiver = new Udp_receiver(port);
-            } catch (Exception e) {
-                System.err.println("Exception in receiver, init: " + e.getMessage());
-                tmp_receiver = null;
-            }
-        }
+        this.udpReceiver = new Udp_receiver(self_port);
+        this.list_ports = list_ports;
+        this.self_id = self_id;
+        this.messager = messager;
+        this.detector = detector;
 
-        udpReceiver = tmp_receiver;
-
-
-        this.ports = ports;
+        //this.senderAck = null;//new Sender_ack(???)
     }
 
-    public void start(){
-        try {
-            while (running) {
+    @Override
+    public void run(){
+        System.out.println("Start receiver");
+        running = true;
 
-                String received = udpReceiver.listen_message();
+        while (running) {
 
+            String received = udpReceiver.listen_message();
+            Message message = new Message(self_id, received);
 
-                //same number of message as number of ','
-                int amount_message = (int) received.chars().filter(c -> c == SEPARATOR_C).count();
-                // split to have 0: id, 1: message1, 2: message2, ..., 8: message8
-                String[] split_received = received.split(SEPARATOR);
+            detector.update(message.getId_sender());
+            messager.receive(message);
 
-                int port_send_back = ports[Integer.parseInt(split_received[0]) - 1];
-                if (!running) {
-                    System.out.println("Break receiver");
-                    return;
-                }
-                udpReceiver.sendBack(port_send_back);
+            //System.out.println("message received " + message);
 
-                for (int i = 0; i < amount_message; i++) {
-                    int message_number = Integer.parseInt(split_received[i + 1].trim());
-
-                    int id = Integer.parseInt(split_received[0]);
-                    IdMessage idMessage = new IdMessage(id, message_number);
-                    if (!running) {
-                        System.out.println("Break receiver 2");
-                        return;
-                    }
-                    messageSeenSet.add(idMessage);
-                }
+            if(!message.isAck()){
+                // If request send ack
+                int port_sender = list_ports[message.getId_sender()];
+                udpReceiver.sendBack(port_sender, message.getAnswer());
             }
-        } catch (Exception e){
-            System.err.println("Exception in receiver, start: " + e.getMessage());
-            start();
         }
     }
 
@@ -97,7 +78,7 @@ public class Receiver {
         }
     }
 
-    public void stop(){
+    public void stop_message(){
         running = false;
         //System.out.println("Stop size message seen " + messageSeenSet.size() + "\n");
     }

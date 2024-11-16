@@ -86,6 +86,15 @@ public class Message {
         return message_numbers;
     }
 
+    public boolean isAck(){
+        return type == 'A' || type == 'B' || type == 'C' || type == 'D' || type == 'E';
+    }
+
+    public Message getAnswer(){
+        char upperCase = Character.toUpperCase(type);
+        return new Message(id_destination, upperCase, id_destination, original_id, message_numbers);
+    }
+
     // Override equals to compare based on id and messageNumber
     @Override
     public boolean equals(Object o) {
@@ -104,9 +113,12 @@ public class Message {
     // toString method for easy debugging
     @Override
     public String toString() {
-        return "Message{" +
-                "id=" + id_destination +
-                ", content=" + content +
-                '}';
+        return "Destination ID: " + id_destination +
+                ", Sender ID: " + id_sender +
+                ", Type: " + type +
+                ", Original ID: " + original_id +
+                ", Message Numbers: " + (message_numbers != null ? java.util.Arrays.toString(message_numbers) : "[]") +
+                ", Extra: " + (extra != null ? extra : "null") +
+                ", Content: " + (content != null ? content : "null");
     }
 }

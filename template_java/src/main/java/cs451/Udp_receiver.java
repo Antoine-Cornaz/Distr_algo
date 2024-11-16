@@ -51,16 +51,20 @@ public class Udp_receiver extends Thread {
         String received
                 = new String(packet.getData(), 0, packet.getLength());
 
+        //System.out.println("received " + received);
         return received;
     }
 
-    public void sendBack(int port){
+    public void sendBack(int port, Message message) {
         try {
             InetAddress address = packet.getAddress(); // Use the same address as received
-            packet = new DatagramPacket(packet.getData(), packet.getLength(), address, port);
+            int sizeMessage = message.getContent().length();
+            byte[] messageContentB = message.getContent().getBytes();
+            packet = new DatagramPacket(messageContentB, sizeMessage,address, port);
+
             socket.send(packet);
         } catch (IOException e) {
-            System.err.println("Exception in udp_receiver, send_back: " + e.getMessage());
+            System.err.println("Exception in udp_receiver, sendBack: " + e.getMessage());
         }
     }
 

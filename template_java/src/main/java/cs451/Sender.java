@@ -1,11 +1,10 @@
 package cs451;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.String;
-import java.util.Arrays;
-
-import static cs451.Constants.*;
+import java.util.List;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 /*
 Class Sender
@@ -19,59 +18,78 @@ Will use Udp_sender to send message 1 by one.
 public class Sender extends Thread {
     private final int[] list_port;
     private final String[] list_ip;
-    private final int self_id;
-    private final int number_message;
     private final Messager messager;
     private final Detector detector;
 
 
+    private final Manager manager;
     private final Udp_sender udpSender;
-    private final FileWriter fileWriter;
-    private boolean isRunning = true;
-    private int last_check_message = 0;
+    private boolean isRunning = false;
 
     public Sender(int[] list_port,
                   String[] list_ip,
                   int self_id,
-                  int number_message,
                   Messager messager,
-                  Detector detector,
-                  String fileName){
-
-       this.list_port = list_port;
-       this.list_ip = list_ip;
-       this.self_id = self_id;
-       this.number_message = number_message;
-       this.messager = messager;
-       this.detector = detector;
+                  Detector detector){
 
 
-        Udp_sender tmp_sender = null;
-        while (tmp_sender == null){
-            try {
-                tmp_sender = new Udp_sender();
-            }catch (Exception e) {
-                System.err.println("Exception in sender, init: " + e.getMessage());
-            }
-        }
-        udpSender = tmp_sender;
+        this.list_port = list_port;
+        this.list_ip = list_ip;
+        this.messager = messager;
+        this.detector = detector;
 
-        try {
-            this.fileWriter = new FileWriter(fileName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        assert list_port.length == list_ip.length;
+
+        int number_processes = list_port.length;
+        this.manager = new Manager(number_processes, self_id);
+
+        udpSender = new Udp_sender();
     }
 
 
-
+    @Override
     public void run(){
-        // TODO
-    }
+
+        isRunning = true;
+
+        while (isRunning) {
+            List<Integer> manage_id = manager.get_manage();
+            List<Message> messages = messager.getMessages(manage_id);
+
+            for (Message m : messages) {
+                String ip = list_ip[m.getId()];
+                int port = list_port[m.getId()];
+                if (!isRunning) break;
+                udpSender.send(m.getContent(), ip, port);
+                //System.out.println("message sent " + m);
+            }
+
+            try {
+                TimeUnit.MICROSECONDS.sleep(100);
+            } catch (InterruptedException ignore) {}
+
+            detector.update_time();
+
+            List<Integer> list_new_alive = detector.get_new_resurect();
+            if(!list_new_alive.isEmpty()){
+                for (int alive: list_new_alive){
+                    System.out.println("new alive " + alive);
+                }
+            }
+            manager.setAlive(list_new_alive);
 
 
-    public void write() {
-        // TODO
+            List<Integer> list_new_dead = detector.get_new_dead();
+            if(!list_new_dead.isEmpty()){
+                for (int dead: list_new_dead){
+                    System.out.println("new dead " + dead);
+                }
+            }
+            manager.setDead(list_new_dead);
+
+
+
+        }
     }
 
     public void stop_message(){

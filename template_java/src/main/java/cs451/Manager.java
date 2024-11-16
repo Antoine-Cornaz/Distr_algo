@@ -1,6 +1,7 @@
 package cs451;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Manager {
 
@@ -15,10 +16,22 @@ public class Manager {
         processes_dead = new boolean[number_processes];
     }
 
+    public void setAlive(List<Integer> list_processes_number){
+        for (int process_number: list_processes_number){
+            setAlive(process_number);
+        }
+    }
+
     public void setAlive(int process_number){
         assert process_number != self_process;
         assert process_number < number_processes;
         processes_dead[process_number] = false;
+    }
+
+    public void setDead(List<Integer> list_processes_number){
+        for (Integer process_number: list_processes_number){
+            setDead(process_number);
+        }
     }
 
     public void setDead(int process_number){
@@ -27,7 +40,7 @@ public class Manager {
         processes_dead[process_number] = true;
     }
 
-    public ArrayList<Integer> get_manage(){
+    public List<Integer> get_manage(){
         ArrayList<Integer> list = new ArrayList<>();
 
         int i = (self_process+1) % number_processes;

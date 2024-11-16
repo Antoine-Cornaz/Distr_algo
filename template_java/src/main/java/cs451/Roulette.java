@@ -49,6 +49,7 @@ public class Roulette {
                 this.states[min_value%batch_size] = SEND;
 
                 min_value++;
+                //System.out.println("roulette min value " + min_value);
             }
 
 
@@ -56,8 +57,11 @@ public class Roulette {
     }
 
     public void add_messages(List<Message> messageList){
+        int size_before = messageList.size();
         add_messages_type(messageList, 'a', (byte) 0);
         add_messages_type(messageList, 'b', (byte) 2);
+        int size_after = messageList.size();
+        //TODO add ping when no more message
     }
 
 
@@ -105,14 +109,16 @@ public class Roulette {
     }
 
     public void print_state(){
-        for (int i = 0; i < batch_size; i++) {
-            if (states[(min_value + i) %batch_size] != SEND){
-                int place = min_value + i;
-                int state = states[(min_value + i) %batch_size];
-                System.out.print(place + "," + state + "\n");
-            }
+        System.out.print(min_value + " ");
+        for (int i = 0; i < batch_size && i < max_value; i++) {
+            int state = states[(min_value + i) %batch_size];
+            System.out.print(state + ",");
         }
         System.out.println();
+    }
+
+    public int getMin(){
+        return min_value;
     }
 
 

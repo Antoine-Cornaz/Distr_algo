@@ -22,16 +22,13 @@ public class Main {
         System.out.println("Writing output.");
 
         //finish the program when asked to finish
-        System.out.println("A");
         if(receiver != null) {
-            System.out.println("B");
             receiver.write();
             receiver.close();
         }
 
 
         if(sender != null){
-            sender.write();
             sender.close();
         }
 
@@ -86,6 +83,10 @@ public class Main {
         // After a process finishes broadcasting,
         // it waits forever for the delivery of messages.
 
+        sender.start();
+        receiver.start();
+
+
         while (true) {
             // Sleep for 1 hour
             Thread.sleep(60 * 60 * 1000);
@@ -98,61 +99,28 @@ public class Main {
 
         List<Host> hosts = parser.hosts();
         int numberProcess = hosts.size();
-        int[] list_port = new int[numberProcess];
+        int[] list_ports = new int[numberProcess];
         String[] list_ip = new String[numberProcess];
 
         for (int i = 0; i < numberProcess; i++) {
-            list_port[i] = hosts.get(i).getPort();
+            list_ports[i] = hosts.get(i).getPort();
             list_ip[i] = hosts.get(i).getIp();
         }
 
-        int self_id = parser.myId();
+        int self_id = parser.myId()-1;
         int number_message = parser.getNumberMessage();
-        Messager messager = new Messager(numberProcess, self_id, number_message);
+        Messager messager = new Messager(numberProcess, self_id, number_message, parser.output());
         Detector detector = new Detector(numberProcess, self_id, INITIAL_PING_TIME_MS);
         String fileName = parser.output();
 
-        // Sender
-        int number_message = parser.getNumberMessage();
-
-        Host host_sender = hosts.get(parser.myId()-1);
-        Host hosts_receiver = hosts.get(index_receive - 1);
-        String destination_ip = hosts_receiver.getIp();
-        int destination_port = hosts_receiver.getPort();
-
-        String outputFileName = parser.output();
-        boolean[] message_received = new boolean[number_message];
-        int port_sender = host_sender.getPort();
-
         sender = new Sender(
-                list_port,
+                list_ports,
                 list_ip,
                 self_id,
-                number_message,
                 messager,
-                detector,
-                outputFileName
+                detector
         );
 
-        Sender_ack senderAck = new Sender_ack(
-                port_sender,
-                message_received,
-                number_message
-        );
-
-        //Send message
-        sender.start();
-        senderAck.start();
-
-        // Receiver
-        System.out.println("I'm the receiver\n");
-        Host hosts_receiver = hosts.get(index_receive - 1);
-        int port = hosts_receiver.getPort();
-        String outputFileName = parser.output();
-        receiver = new Receiver(port, outputFileName, list_port);
-        receiver.start();
-
-
-
+        receiver = new Receiver(fileName, list_ports, self_id, messager, detector);
     }
 }

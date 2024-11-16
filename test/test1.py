@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 10_000_000
+NUMBER_MESSAGES = 10_000
 
 
 def main():
@@ -29,95 +29,99 @@ def main():
     print("start process")
 
     # Call teacher test
-    subprocess.call(shlex.split('../tools/stress.py perfect -r ../template_java/run.sh -l ../prof_test/ -p 3 -m ' + str(NUMBER_MESSAGES)))
+    #subprocess.call(shlex.split('../tools/stress.py fifo -r RUNSCRIPT -l LOGSDIR -p 2 -m ' + str(NUMBER_MESSAGES)))
+    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 3 -m ' + str(NUMBER_MESSAGES)))
 
-    r2, r3 = verify_receiver('01')
-    s2 = verify_sender('02')
-    s3 = verify_sender('03')
+    v = []
+    v.append(verify('01'))
+    v.append(verify('02'))
+    v.append(verify('03'))
 
-    if not r2.issubset(s2):
-        print("Some messages has been delivered for the receiver but never sent p2")
-        diff = r2.difference(s2)
-        if len(diff) < 10:
-            print(diff)
+    # Verify message delivred is message broadcasted
+    for i in range(3):
+        for j in range(3):
+            if not v[i][j+1].issubset(v[j][0]):
+                diff = v[i][j+1].difference(v[j][0])
+                if len(diff) < 10:
+                    print(diff)
 
-    if not r3.issubset(s3):
-        print("Some messages has been delivered for the receiver but never sent p3")
-        diff = r3.difference(s3)
-        if len(diff) < 10:
-            print(diff)
+    # Verify if one get it all get it
+    for i in range(3):
+        if v[0][i] != v[i][1] or v[0][i] != v[i][2] or v[0][i] != v[i][3]:
+            print(i, ", error not everyone get message", len(v[0][i]), len(v[i][1]), len(v[i][2]), len(v[i][3]))
 
-    print("s2 ", len(s2), " r2 " , len(r2))
-    print("s3 ", len(s3), " r3 " , len(r3))
+    # Verify no 0 or > number message
+    for i in range(3):
+        for j in range(4):
+            if 0 in v[i][j]:
+                print("subset contain 0", i, j, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
+            if NUMBER_MESSAGES+1 in v[i][j]:
+                #i=receiver, j=sender 0 if broadcast, 1,2,3 if receive
+                print("subset contain message to high", i, j, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
 
-    send_ratio = 100*(len(s2) + len(s3))/(2*NUMBER_MESSAGES)
-    received_ratio = 100*(len(r2) + len(r3))/(2*NUMBER_MESSAGES)
 
-    print("sent " + str(send_ratio) + "%")
-    print("recived " + str(received_ratio) + "%")
+    for i in range(3):
+        print(i, "broadcast", len(v[i][0]) / NUMBER_MESSAGES * 100, "%")
+
+    for i in range(3):
+        value = 0
+        for j in range(3):
+            value += len(v[j][i+1])
+        print(i, "deliver", value / NUMBER_MESSAGES/3 * 100, "%")
 
     print("Finish")
 
 
 
 
-def verify_receiver(number):
+def verify(number):
+
+    broadcast = set()
+    value_p1 = set()
     value_p2 = set()
-    #p2 receive
     value_p3 = set()
+
     # Open the file in read mode
-    #try:
-    if True:
-        with open('../prof_test/proc' + number + '.output', 'r') as file:
-            # Read each line in the file
-            for line in file:
-                line_words = line.split()
-                if len(line_words) != 3:
-                    print("Error receiver, line does not have 3 arguments ", str(len(line_words)))
-                if not line_words[0] == "d":
-                    print("Error first char is not d $" + str(line_words[0]) + "$", )
+    with open('../prof_test/proc' + number + '.output', 'r') as file:
+        # Read each line in the file
+        for line in file:
+            line_words = line.split()
+            if len(line_words) == 2:
+                if not line_words[0] == "b":
+                    print("Error 2 args but first char is not b $" + str(line_words[0]) + "$", )
                     print("$"+line+"$")
-                    return value_p2, value_p3
+                broadcast.add(line_words[1])
+            elif len(line_words) == 3:
+                if not line_words[0] == "d":
+                    print("Error 3 args but first char is not d $" + str(line_words[0]) + "$", )
+                    print("$"+line+"$")
 
                 message_number = int(line_words[1])
-                if message_number == 2:
+                if message_number == 1:
 
-                    if message_number in value_p2:
+                    if message_number in value_p1:
                         print("Error value received 2 times p1:" + str(message_number))
-                        return value_p2, value_p3
+
+                    else:
+                        value_p1.add(line_words[2])
+
+                elif message_number == 2:
+                    if message_number in value_p2:
+                        print("Error value received 2 times p2:" + str(message_number))
                     else:
                         value_p2.add(line_words[2])
+                elif message_number == 3:
+                    if message_number in value_p3:
+                        print("Error value received 2 times p2:" + str(message_number))
+                    else:
+                        value_p3.add(line_words[2])
                 else:
-                    value_p3.add(line_words[2])
+                    print("error value sender number " + message_number)
 
-    return value_p2, value_p3
+            else:
+                print("ERROR, wrong number of argument, should be 2 or 3 but not " + len(line_words))
+                print("$"+line+"$")
 
-
-def verify_sender(number):
-    value_p = set()
-
-    # Open the file in read mode
-    try:
-        with open('../prof_test/proc' + number + '.output', 'r') as file:
-            # Read each line in the file
-            for line in file:
-                line_words = line.split()
-                if len(line_words) != 2:
-                    print("Error sender, line does not have 2 arguments ", str(len(line_words)))
-                    return value_p
-                if not line_words[0] == "b":
-                    print("Error first char is not b $"  + str(line_words[0]) + "$")
-                    print("$"+line+"$")
-                    return value_p
-                if line_words[1] in value_p:
-                    print("Error sender send id " + number + " value send twice " + str(line_words[1]))
-                value_p.add(line_words[1])
-
-    except:
-        print("ERROR in reading file " + number + " as a sender")
-        return value_p
-
-    return value_p
-
+    return broadcast, value_p1, value_p2, value_p3
 
 main()
