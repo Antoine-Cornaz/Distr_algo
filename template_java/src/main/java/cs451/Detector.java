@@ -37,8 +37,7 @@ public class Detector {
         last_message_time = new long[number_process];
 
         // Initialize the delay 2 seconds after start so we don't have everything down after 1 sec.
-        long START_SHIFT_TIME_MILLIS = 0L;
-        Arrays.fill(last_message_time, System.currentTimeMillis() + START_SHIFT_TIME_MILLIS);
+        Arrays.fill(last_message_time, System.currentTimeMillis() + Constants.START_SHIFT_TIME_MILLIS);
 
         was_dead = new boolean[number_process];
     }
@@ -90,7 +89,7 @@ public class Detector {
         return new_resurect;
     }
 
-
+    /*
     public static void main (String[] args) throws InterruptedException {
         //int min_value, int max_value, int process_id, int batch_size
 
@@ -141,5 +140,5 @@ public class Detector {
         }
         System.out.println();
     }
-
+    */
 }

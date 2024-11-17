@@ -23,7 +23,6 @@ public class Main {
 
         //finish the program when asked to finish
         if(receiver != null) {
-            receiver.write();
             receiver.close();
         }
 

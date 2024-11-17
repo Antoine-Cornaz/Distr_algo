@@ -1,7 +1,7 @@
 ../prof_test/config
-My PID: 19813
+My PID: 5276
 
-From a new terminal type `kill -SIGINT 19813` or `kill -SIGTERM 19813` to stop processing packets
+From a new terminal type `kill -SIGINT 5276` or `kill -SIGTERM 5276` to stop processing packets
 
 My ID: 3
 
@@ -36,11 +36,5 @@ Broadcasting and delivering messages...
 output parser:/home/dcl/Distr_algo/prof_test/proc03.output
 
 Start receiver
-new dead 1
-new alive 1
-new dead 0
-new dead 1
 Immediately stopping network packet processing.
 Writing output.
-Writing
-

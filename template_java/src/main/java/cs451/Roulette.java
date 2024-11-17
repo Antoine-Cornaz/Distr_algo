@@ -56,17 +56,17 @@ public class Roulette {
         }
     }
 
-    public void add_messages(List<Message> messageList){
+    public void add_messages(List<Message> messageList, int original_sender){
         int size_before = messageList.size();
-        add_messages_type(messageList, 'a', (byte) 0);
-        add_messages_type(messageList, 'b', (byte) 2);
+        add_messages_type(messageList, 'a', (byte) 0, original_sender);
+        add_messages_type(messageList, 'b', (byte) 2, original_sender);
         int size_after = messageList.size();
         //TODO add ping when no more message
     }
 
 
 
-    private void add_messages_type(List<Message> messageList, char type_message, byte state){
+    private void add_messages_type(List<Message> messageList, char type_message, byte state, int original_sender){
         int i = 0;
 
         int max = Math.min(batch_size, max_value - min_value);
@@ -92,7 +92,7 @@ public class Roulette {
             if (j == 0) return;
             int[] copyArray = Arrays.copyOf(message_number, j);
 
-            Message message = new Message(peer_id, type_message, self_id, self_id, copyArray);
+            Message message = new Message(peer_id, type_message, self_id, original_sender, copyArray);
             messageList.add(message);
         }
     }
@@ -121,13 +121,13 @@ public class Roulette {
         return min_value;
     }
 
-
+    /*
     public static void main (String[] args) {
         //int min_value, int max_value, int process_id, int batch_size
         Roulette roulette = new Roulette(0, 12, 3, 50, 7);
 
         ArrayList<Message> list = new ArrayList<>();
-        roulette.add_messages(list);
+        roulette.add_messages(list, 7);
 
         for (Message m : list) {
             System.out.println("id " + m.getId() + " content " + m.getContent());
@@ -146,7 +146,7 @@ public class Roulette {
         roulette.increase_value(16, (byte) 3);
 
 
-        roulette.add_messages(list);
+        roulette.add_messages(list, 7);
 
         for (Message m : list) {
             System.out.println("id " + m.getId() + " content " + m.getContent());
@@ -165,10 +165,10 @@ public class Roulette {
         roulette.increase_value(47, (byte) 2);
         roulette.increase_value(49, (byte) 2);
 
-        roulette.add_messages(list);
+        roulette.add_messages(list, 7);
         for (Message m : list) {
             System.out.println("id " + m.getId() + " content " + m.getContent());
         }
     }
-
+    */
 }

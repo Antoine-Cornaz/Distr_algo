@@ -64,9 +64,8 @@ public class Sender extends Thread {
                 //System.out.println("message sent " + m);
             }
 
-            try {
-                TimeUnit.MICROSECONDS.sleep(100);
-            } catch (InterruptedException ignore) {}
+            // Say to the OS if you want to pause it's the right time
+            Thread.yield();
 
             detector.update_time();
 
@@ -86,9 +85,6 @@ public class Sender extends Thread {
                 }
             }
             manager.setDead(list_new_dead);
-
-
-
         }
     }
 

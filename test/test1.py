@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 10_000
+NUMBER_MESSAGES = 1000
 
 
 def main():
@@ -53,12 +53,12 @@ def main():
     # Verify no 0 or > number message
     for i in range(3):
         for j in range(4):
-            if 0 in v[i][j]:
-                print("subset contain 0", i, j, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
-            if NUMBER_MESSAGES+1 in v[i][j]:
-                #i=receiver, j=sender 0 if broadcast, 1,2,3 if receive
-                print("subset contain message to high", i, j, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
+            for m in v[i][j]:
+                m = int(m)
 
+                if not (0 < m and m <= NUMBER_MESSAGES):
+                    #i=receiver, j=sender 0 if broadcast, 1,2,3 if receive
+                    print("subset contain message not in list", i, j, m, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
 
     for i in range(3):
         print(i, "broadcast", len(v[i][0]) / NUMBER_MESSAGES * 100, "%")
@@ -68,6 +68,21 @@ def main():
         for j in range(3):
             value += len(v[j][i+1])
         print(i, "deliver", value / NUMBER_MESSAGES/3 * 100, "%")
+
+    with open('../prof_test/proc01.stderr', 'r') as file:
+        m = file.read()
+        if m != "":
+            print(m)
+
+    with open('../prof_test/proc02.stderr', 'r') as file:
+        m = file.read()
+        if m != "":
+            print(m)
+
+    with open('../prof_test/proc02.stderr', 'r') as file:
+        m = file.read()
+        if m != "":
+            print(m)
 
     print("Finish")
 
@@ -90,6 +105,9 @@ def verify(number):
                 if not line_words[0] == "b":
                     print("Error 2 args but first char is not b $" + str(line_words[0]) + "$", )
                     print("$"+line+"$")
+
+                if line_words[1] != '1' and str(int(line_words[1])-1) not in broadcast:
+                    print("Error previous one not there broadcast", line_words[1])
                 broadcast.add(line_words[1])
             elif len(line_words) == 3:
                 if not line_words[0] == "d":
@@ -103,17 +121,23 @@ def verify(number):
                         print("Error value received 2 times p1:" + str(message_number))
 
                     else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p1:
+                            print("Error previous one not there p1", line)
                         value_p1.add(line_words[2])
 
                 elif message_number == 2:
                     if message_number in value_p2:
                         print("Error value received 2 times p2:" + str(message_number))
                     else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p2:
+                            print("Error previous one not there p2", line)
                         value_p2.add(line_words[2])
                 elif message_number == 3:
                     if message_number in value_p3:
                         print("Error value received 2 times p2:" + str(message_number))
                     else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p3:
+                            print("Error previous one not there p3", line)
                         value_p3.add(line_words[2])
                 else:
                     print("error value sender number " + message_number)

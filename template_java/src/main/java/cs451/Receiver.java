@@ -55,40 +55,22 @@ public class Receiver extends Thread{
             //System.out.println("message received " + message);
 
             if(!message.isAck()){
-                // If request send ack
+                // If it is a request send ack
                 int port_sender = list_ports[message.getId_sender()];
                 udpReceiver.sendBack(port_sender, message.getAnswer());
             }
         }
     }
 
-    public void write() {
-        System.out.println("Writing\n");
-
-        try {
-            for (IdMessage idMessage : messageSeenSet) {
-                String message = "d " + idMessage.getId() + " " + idMessage.getMessageNumber() + "\n";
-
-                fileWriter.write(message);
-            }
-
-            fileWriter.flush();
-        } catch (IOException e) {
-            System.err.println("Exception in receiver, write: " + e.getMessage());
-        }
-    }
-
-    public void stop_message(){
-        running = false;
-        //System.out.println("Stop size message seen " + messageSeenSet.size() + "\n");
-    }
-
     public void close(){
+        running = false;
         try {
+            fileWriter.flush();
             fileWriter.close();
         }catch (IOException e){
             System.err.println("Exception in receiver, close: " + e.getMessage());
         }
         udpReceiver.close();
+        messager.close();
     }
 }

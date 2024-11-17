@@ -92,7 +92,7 @@ public class Message {
 
     public Message getAnswer(){
         char upperCase = Character.toUpperCase(type);
-        return new Message(id_destination, upperCase, id_destination, original_id, message_numbers);
+        return new Message(id_sender, upperCase, id_destination, original_id, message_numbers);
     }
 
     // Override equals to compare based on id and messageNumber
