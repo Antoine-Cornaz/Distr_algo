@@ -1,7 +1,7 @@
 ../prof_test/config
-My PID: 5276
+My PID: 7583
 
-From a new terminal type `kill -SIGINT 5276` or `kill -SIGTERM 5276` to stop processing packets
+From a new terminal type `kill -SIGINT 7583` or `kill -SIGTERM 7583` to stop processing packets
 
 My ID: 3
 

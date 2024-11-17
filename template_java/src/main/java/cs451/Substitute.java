@@ -3,6 +3,8 @@ package cs451;
 import java.util.List;
 import java.util.Set;
 
+import static cs451.Constants.BATCH_SIZE;
+
 public class Substitute {
 
     private final int self_id;
@@ -12,6 +14,8 @@ public class Substitute {
     private final int max_value;
 
     private final Roulette[] roulettes;
+    private final int[] max_values_other;
+    private int max_max_values_other;
 
 
     public Substitute(int self_id, int number_processes, int substitute_id, Set<Message> messages, int max_value){
@@ -21,6 +25,11 @@ public class Substitute {
         this.messages = messages;
         this.max_value = max_value;
         this.roulettes = new Roulette[number_processes];
+        this.max_values_other = new int[number_processes];
+        this.max_max_values_other = -1;
+        for (int i = 0; i < number_processes; i++) {
+            this.max_values_other[i]=-1;
+        }
     }
 
 
@@ -35,5 +44,33 @@ public class Substitute {
                 roulettes[i].add_messages(messages, substitute_id);
             }
         }
+    }
+
+    public void answer(Message message){
+        //assert message.getType() == 'D' || message.getType() == 'E';
+        assert message.getOriginal_id() == substitute_id;
+        // TODO
+
+        switch (message.getType()){
+            case 'D':
+                int max_value = message.getMessage_numbers()[0];
+                int id = message.getId_sender();
+                this.max_values_other[id] = max_value;
+                if(max_max_values_other < max_value){
+                    max_max_values_other = max_value;
+
+                    //Update others
+                    for (int i = 0; i < number_processes; i++) {
+                        if(roulettes[i] == null) continue;
+                        roulettes[i].setMax_value(max_value);
+                    }
+                }
+
+                roulettes[id] = new Roulette(max_value, max_max_values_other, id, BATCH_SIZE, self_id);
+                break;
+            case 'E':
+                break;
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package cs451;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,7 +7,7 @@ import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
 
 public class Roulette {
     private int min_value;
-    private final int max_value;
+    private int max_value;
     private final int peer_id;
     private final int batch_size;
     private final int self_id;
@@ -54,6 +53,10 @@ public class Roulette {
 
 
         }
+    }
+
+    public void setMax_value(int max_value){
+        this.max_value = max_value;
     }
 
     public void add_messages(List<Message> messageList, int original_sender){
@@ -117,8 +120,33 @@ public class Roulette {
         System.out.println();
     }
 
-    public int getMin(){
+    public int getMinConfirmed(){
         return min_value;
+    }
+
+    public int getMinExist(){
+        int i = min_value;
+        while (SENT <= getState(i)){
+            i++;
+        }
+
+        return i;
+    }
+
+    // Return a list with value 8,9,10,11 if max_value is 8 and has message 8,9,10,11 and not 12.
+    public int[] getFrom(int max_value){
+        int[] messages = new int[MAX_MESSAGE_PER_PACKET];
+        for (int i = 0; i < MAX_MESSAGE_PER_PACKET; i++) {
+            byte state = getState(max_value + i);
+            if (state >= SENT){
+                messages[i] = max_value + i;
+            }else {
+                System.arraycopy(messages, 0, messages, 0, i);
+                return Arrays.copyOf(messages, i);
+            }
+        }
+
+        return messages;
     }
 
     /*

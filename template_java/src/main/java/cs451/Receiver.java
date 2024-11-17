@@ -50,14 +50,14 @@ public class Receiver extends Thread{
             Message message = new Message(self_id, received);
 
             detector.update(message.getId_sender());
-            messager.receive(message);
+            Message answer = messager.receive(message);
 
             //System.out.println("message received " + message);
 
-            if(!message.isAck()){
+            if(answer != null){
                 // If it is a request send ack
                 int port_sender = list_ports[message.getId_sender()];
-                udpReceiver.sendBack(port_sender, message.getAnswer());
+                udpReceiver.sendBack(port_sender, answer);
             }
         }
     }

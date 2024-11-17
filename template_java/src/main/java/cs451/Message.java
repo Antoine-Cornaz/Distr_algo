@@ -95,6 +95,14 @@ public class Message {
         return new Message(id_sender, upperCase, id_destination, original_id, message_numbers);
     }
 
+    public Message getAnswerD(int max_value){
+        return new Message(id_sender, 'D', id_destination, original_id, new int[]{max_value});
+    }
+
+    public Message getAnswerE(int[] answer){
+        return new Message(id_sender, 'E', id_destination, original_id, answer);
+    }
+
     // Override equals to compare based on id and messageNumber
     @Override
     public boolean equals(Object o) {

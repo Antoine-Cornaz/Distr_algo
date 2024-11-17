@@ -1,6 +1,5 @@
 package cs451;
 
-import java.io.IOException;
 import java.util.*;
 
 import static cs451.Constants.BATCH_SIZE;
@@ -12,6 +11,7 @@ public class Messager {
     private final Set<Message> setA;
     private final Set<Message> setB;
     private final Roulette[] roulettes;
+    private final Substitute[] substitutes;
     private final MyWriter myWriter;
     public Messager(int number_processes, int self_process, int number_messages, String fileName){
 
@@ -22,6 +22,7 @@ public class Messager {
         setB = new HashSet<>();
 
         roulettes = new Roulette[number_processes];
+        substitutes = new Substitute[number_processes];
         for (int i = 0; i < number_processes; i++) {
             roulettes[i] = new Roulette(0, number_messages, i, BATCH_SIZE, self_process);
         }
@@ -30,7 +31,7 @@ public class Messager {
 
     }
 
-    public void receive(Message message){
+    public Message receive(Message message){
         //System.out.println("message recu " + message.getType());
         boolean isNew;
         switch (message.getType()) {
@@ -61,38 +62,70 @@ public class Messager {
 
             case 'D':
                 //TODO
+                substitutes[message.getOriginal_id()].answer(message);
+                break;
+
+            case 'E':
+                // TODO
                 break;
 
             case 'a':
                 // TODO
-                break;
+                return message.getAnswer();
 
             case 'b':
                 // TODO
-                break;
+                return message.getAnswer();
 
             case 'c':
                 // TODO
-                break;
+                return message.getAnswer();
 
             case 'd':
                 // TODO
-                break;
+                int max_value_sender = message.getMessage_numbers()[0];
+                int original_sender = message.getOriginal_id();
+                int max_value_self = roulettes[original_sender].getMinConfirmed();
+
+                if (max_value_self <= max_value_sender){
+                    System.out.println(message.getAnswerD(max_value_self));
+                    return message.getAnswerD(max_value_self);
+                }else {
+                    int[] list_message = roulettes[original_sender].getFrom(max_value_sender);
+                    System.out.println(message.getAnswerE(list_message));
+                    return message.getAnswerE(list_message);
+                }
 
             default:
                 System.err.println("type " + message.getType());
         }
 
+        return null;
+
     }
 
     public List<Message> getMessages(List<Integer> manage_id){
+
         ArrayList<Message> messageList = new ArrayList<>();
+        for (Integer id: manage_id){
+            if (substitutes[id] == null){
+                substitutes[id] = new Substitute(self_process, number_processes, id, setA, roulettes[id].getMinExist());
+            }
+
+            substitutes[id].addMessages(messageList);
+        }
 
         for (int i = 0; i < number_processes; i++) {
             roulettes[i].add_messages(messageList, self_process);
         }
 
         return messageList;
+    }
+
+    public void killSubstitute(List<Integer> list_id){
+        for (Integer id: list_id){
+            substitutes[id] = null;
+        }
     }
 
     public void update_to_confirm_if_majority (int msg_number){

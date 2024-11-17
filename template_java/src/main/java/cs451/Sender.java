@@ -1,9 +1,7 @@
 package cs451;
 
-import java.io.IOException;
 import java.lang.String;
 import java.util.List;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -67,6 +65,10 @@ public class Sender extends Thread {
             // Say to the OS if you want to pause it's the right time
             Thread.yield();
 
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {}
+
             detector.update_time();
 
             List<Integer> list_new_alive = detector.get_new_resurect();
@@ -76,6 +78,7 @@ public class Sender extends Thread {
                 }
             }
             manager.setAlive(list_new_alive);
+            messager.killSubstitute(list_new_alive);
 
 
             List<Integer> list_new_dead = detector.get_new_dead();
@@ -85,6 +88,9 @@ public class Sender extends Thread {
                 }
             }
             manager.setDead(list_new_dead);
+
+
+
         }
     }
 
