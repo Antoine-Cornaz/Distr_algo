@@ -105,10 +105,11 @@ public class Main {
             list_ports[i] = hosts.get(i).getPort();
             list_ip[i] = hosts.get(i).getIp();
         }
+        MyWriter myWriter = new MyWriter(parser.output());
 
         int self_id = parser.myId()-1;
         int number_message = parser.getNumberMessage();
-        Messager messager = new Messager(numberProcess, self_id, number_message, parser.output());
+        Messager messager = new Messager(numberProcess, self_id, number_message, myWriter);
         Detector detector = new Detector(numberProcess, self_id, INITIAL_PING_TIME_MS);
         String fileName = parser.output();
 

@@ -3,23 +3,19 @@ package cs451;
 import java.lang.String;
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;  // Import the IOException class to handle errors
-import java.util.HashSet;
-import java.util.Set;
-
 
 public class Receiver extends Thread{
 
     private final Udp_receiver udpReceiver;
     private FileWriter fileWriter;
-    private final Set<IdMessage> messageSeenSet;
     private boolean running = false;
     private final int[] list_ports;
     private final int self_id;
     private final Messager messager;
     private final Detector detector;
-    //private final Sender_ack senderAck;
 
-    public Receiver(String outputFileName, int[] list_ports, int self_id, Messager messager, Detector detector){
+    public Receiver(String outputFileName, int[] list_ports, int self_id,
+                    Messager messager, Detector detector){
         // Create the file to write.
         try {
             fileWriter = new FileWriter(outputFileName);
@@ -29,14 +25,11 @@ public class Receiver extends Thread{
 
         int self_port = list_ports[self_id];
 
-        messageSeenSet = new HashSet<>();
         this.udpReceiver = new Udp_receiver(self_port);
         this.list_ports = list_ports;
         this.self_id = self_id;
         this.messager = messager;
         this.detector = detector;
-
-        //this.senderAck = null;//new Sender_ack(???)
     }
 
     @Override
@@ -52,7 +45,12 @@ public class Receiver extends Thread{
             detector.update(message.getId_sender());
             Message answer = messager.receive(message);
 
-            //System.out.println("message received " + message);
+            if (message.getType() != 'c' && message.getType() != 'C'){
+                System.out.println("Recu " + message);
+                System.out.println("Send " + answer);
+                System.out.println();
+            }
+
 
             if(answer != null){
                 // If it is a request send ack

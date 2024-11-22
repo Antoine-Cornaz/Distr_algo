@@ -8,12 +8,13 @@ public class Messager {
 
     private final int number_processes;
     private final int self_process;
-    private final Set<Message> setA;
-    private final Set<Message> setB;
+    private final Set<IdMessage> setA;
+    private final Set<IdMessage> setB;
     private final Roulette[] roulettes;
     private final Substitute[] substitutes;
     private final MyWriter myWriter;
-    public Messager(int number_processes, int self_process, int number_messages, String fileName){
+    private int lastMessage = -1;
+    public Messager(int number_processes, int self_process, int number_messages, MyWriter myWriter){
 
         this.number_processes = number_processes;
         this.self_process = self_process;
@@ -27,33 +28,38 @@ public class Messager {
             roulettes[i] = new Roulette(0, number_messages, i, BATCH_SIZE, self_process);
         }
 
-        myWriter = new MyWriter(fileName);
+        this.myWriter = myWriter;
 
     }
 
     public Message receive(Message message){
         //System.out.println("message recu " + message.getType());
-        boolean isNew;
+        boolean isNew=false;
         switch (message.getType()) {
             case 'A':
-                isNew = setA.add(message);
-                if (isNew) {
-                    for (int message_number : message.getMessage_numbers()) {
+                for (int message_number : message.getMessage_numbers()) {
+                    isNew = setA.add(new IdMessage(message.getId_sender(), message_number));
+                    if (!isNew) continue;;
+
+                    if (message.getOriginal_id() == self_process) {
                         roulettes[message.getId_sender()].increase_value(message_number, Roulette.SENT);
                         //System.out.println("update roulette sender: " + message.getId_sender());
                         update_to_confirm_if_majority(message_number);
+                    } else {
+                        System.out.println("substitute get \n" + message);
+                        substitutes[message.getOriginal_id()].get_message(message);
                     }
                 }
                 break;
             case 'B':
-                isNew = setB.add(message);
                 //System.out.println("confirmed " + message.getMessage_numbers()[0]);
-                if (isNew) {
-                    for (int message_number : message.getMessage_numbers()) {
-                        roulettes[message.getId_sender()].increase_value(message_number, Roulette.CONFIRMED);
-                        myWriter.newDeliverMessage(new MessageObject(message.getId_sender(), message_number));
-                    }
+
+                for (int message_number : message.getMessage_numbers()) {
+                    isNew = setB.add(new IdMessage(message.getId_sender(), message_number));
+                    if (!isNew) continue;
+                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.CONFIRMED);
                 }
+
                 break;
 
             case 'C':
@@ -62,7 +68,7 @@ public class Messager {
 
             case 'D':
                 //TODO
-                substitutes[message.getOriginal_id()].answer(message);
+                substitutes[message.getOriginal_id()].get_message(message);
                 break;
 
             case 'E':
@@ -75,6 +81,10 @@ public class Messager {
 
             case 'b':
                 // TODO
+                for (int msg_number : message.getMessage_numbers()){
+                    System.out.println("write new deliver original id " + message.getOriginal_id()  + " msg number " + msg_number);
+                    myWriter.newDeliverMessage(new MessageObject(message.getOriginal_id(), msg_number));
+                }
                 return message.getAnswer();
 
             case 'c':
@@ -85,7 +95,10 @@ public class Messager {
                 // TODO
                 int max_value_sender = message.getMessage_numbers()[0];
                 int original_sender = message.getOriginal_id();
-                int max_value_self = roulettes[original_sender].getMinConfirmed();
+                System.out.println("Messager original sender " + original_sender);
+                roulettes[original_sender].print_state();
+                int max_value_self = maxSet(original_sender, setA);
+                System.out.println("Messager max_value_self " + max_value_self + " from sender " + original_sender);
 
                 if (max_value_self <= max_value_sender){
                     System.out.println(message.getAnswerD(max_value_self));
@@ -109,15 +122,28 @@ public class Messager {
         ArrayList<Message> messageList = new ArrayList<>();
         for (Integer id: manage_id){
             if (substitutes[id] == null){
-                substitutes[id] = new Substitute(self_process, number_processes, id, setA, roulettes[id].getMinExist());
+                substitutes[id] = new Substitute(self_process, number_processes, id, setA, roulettes[id].getMin());
             }
 
             substitutes[id].addMessages(messageList);
         }
 
+        int max_send = -1;
         for (int i = 0; i < number_processes; i++) {
             roulettes[i].add_messages(messageList, self_process);
+            int current_max_send = roulettes[i].getMax_value_sent();
+            if (max_send < current_max_send){
+                max_send = current_max_send;
+            }
         }
+
+        if(lastMessage < max_send){
+            for (int i = lastMessage; i < max_send; i++) {
+                myWriter.newDeliverMessage(new MessageObject(-1, i+1));
+            }
+            lastMessage = max_send;
+        }
+
 
         return messageList;
     }
@@ -143,7 +169,6 @@ public class Messager {
         if (counter_receive > number_processes/2){
             // 50% < received
             // if majority received
-            myWriter.newDeliverMessage(new MessageObject(-1, msg_number));
             for (int i = 0; i < number_processes; i++) {
                 roulettes[i].increase_value(msg_number, Roulette.TO_CONFIRM);
             }
@@ -163,6 +188,15 @@ public class Messager {
             //System.out.println(roulettes[i].getMin());
         }
 
+    }
+
+    private int maxSet(int id, Set<IdMessage> set){
+        int i = 0;
+        while (set.contains(new IdMessage(id, i))){
+            i++;
+        }
+
+        return i;
     }
 
     /*

@@ -1,7 +1,7 @@
 ../prof_test/config
-My PID: 7582
+My PID: 15124
 
-From a new terminal type `kill -SIGINT 7582` or `kill -SIGTERM 7582` to stop processing packets
+From a new terminal type `kill -SIGINT 15124` or `kill -SIGTERM 15124` to stop processing packets
 
 My ID: 2
 
@@ -36,5 +36,23 @@ Broadcasting and delivering messages...
 output parser:/home/dcl/Distr_algo/prof_test/proc02.output
 
 Start receiver
+Messager original sender 0
+0 0,0,0,0,0,0,0,0,
+Messager max_value_self 0 from sender 0
+1 (0)  -> 2 type: D packet: [0]
+Recu 2 (0)  -> 1 type: d packet: [0]
+Send 1 (0)  -> 2 type: D packet: [0]
+
+Messager original sender 1
+0 0,0,0,0,0,0,0,0,
+Messager max_value_self 0 from sender 1
+1 (1)  -> 2 type: D packet: [0]
+Recu 2 (1)  -> 1 type: d packet: [0]
+Send 1 (1)  -> 2 type: D packet: [0]
+
+Recu 2 (2)  -> 1 type: a packet: [0, 1, 2, 3, 4, 5, 6, 7]
+Send 1 (2)  -> 2 type: A packet: [0, 1, 2, 3, 4, 5, 6, 7]
+
+Messager original sender 3
 Immediately stopping network packet processing.
 Writing output.

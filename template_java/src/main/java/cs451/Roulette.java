@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
+import static java.lang.Math.min;
 
 public class Roulette {
     private int min_value;
@@ -58,6 +59,9 @@ public class Roulette {
     public void setMax_value(int max_value){
         this.max_value = max_value;
     }
+    public int getMax_value_sent(){
+        return min(min_value+batch_size-1, max_value-1);
+    }
 
     public void add_messages(List<Message> messageList, int original_sender){
         int size_before = messageList.size();
@@ -65,6 +69,10 @@ public class Roulette {
         add_messages_type(messageList, 'b', (byte) 2, original_sender);
         int size_after = messageList.size();
         //TODO add ping when no more message
+        if (size_after - size_before == 0){
+            Message message = new Message(peer_id, 'c', self_id, original_sender, new int[]{42});
+            messageList.add(message);
+        }
     }
 
 
@@ -72,7 +80,7 @@ public class Roulette {
     private void add_messages_type(List<Message> messageList, char type_message, byte state, int original_sender){
         int i = 0;
 
-        int max = Math.min(batch_size, max_value - min_value);
+        int max = min(batch_size, max_value - min_value);
 
         while(i < max) {
             int[] message_number = new int[8];
@@ -120,11 +128,11 @@ public class Roulette {
         System.out.println();
     }
 
-    public int getMinConfirmed(){
+    public int getMin(){
         return min_value;
     }
 
-    public int getMinExist(){
+    public int getMinGot(){
         int i = min_value;
         while (SENT <= getState(i)){
             i++;

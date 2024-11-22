@@ -1,7 +1,7 @@
 ../prof_test/config
-My PID: 7583
+My PID: 15125
 
-From a new terminal type `kill -SIGINT 7583` or `kill -SIGTERM 7583` to stop processing packets
+From a new terminal type `kill -SIGINT 15125` or `kill -SIGTERM 15125` to stop processing packets
 
 My ID: 3
 
@@ -31,10 +31,5 @@ Path to config:
 Doing some initialization
 
 Udp_receiver port 11003
-Broadcasting and delivering messages...
-
-output parser:/home/dcl/Distr_algo/prof_test/proc03.output
-
-Start receiver
 Immediately stopping network packet processing.
 Writing output.

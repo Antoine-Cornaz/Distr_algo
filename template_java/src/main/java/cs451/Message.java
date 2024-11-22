@@ -121,12 +121,10 @@ public class Message {
     // toString method for easy debugging
     @Override
     public String toString() {
-        return "Destination ID: " + id_destination +
-                ", Sender ID: " + id_sender +
-                ", Type: " + type +
-                ", Original ID: " + original_id +
-                ", Message Numbers: " + (message_numbers != null ? java.util.Arrays.toString(message_numbers) : "[]") +
-                ", Extra: " + (extra != null ? extra : "null") +
-                ", Content: " + (content != null ? content : "null");
+        return id_sender +
+                " (" + original_id +
+                ")  -> " + id_destination +
+                " type: " +  type +
+                " packet: " + (message_numbers != null ? java.util.Arrays.toString(message_numbers) : "[]");
     }
 }
