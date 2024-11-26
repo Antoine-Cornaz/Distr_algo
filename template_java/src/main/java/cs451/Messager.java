@@ -35,7 +35,10 @@ public class Messager {
     public Message receive(Message message){
         //System.out.println("message recu " + message.getType());
 
-        if (message.isAnswer() && message.getOriginal_id() != self_process){
+        if (message.isAnswer() &&
+                message.getOriginal_id() != self_process &&
+                substitutes[message.getOriginal_id()] != null){
+
             substitutes[message.getOriginal_id()].receive_message(message);
         }
 
@@ -86,7 +89,7 @@ public class Messager {
             case 'b':
                 // TODO
                 for (int msg_number : message.getMessage_numbers()){
-                    System.out.println("write new deliver original id " + message.getOriginal_id()  + " msg number " + msg_number);
+                    //System.out.println("write new deliver original id " + message.getOriginal_id()  + " msg number " + msg_number);
                     myWriter.newDeliverMessage(new MessageObject(message.getOriginal_id(), msg_number));
                 }
                 return message.getAnswer();
@@ -99,17 +102,17 @@ public class Messager {
                 // TODO
                 int max_value_sender = message.getMessage_numbers()[0];
                 int original_sender = message.getOriginal_id();
-                System.out.println("Messager original sender " + original_sender);
-                roulettes[original_sender].print_state();
-                int max_value_self = maxSet(original_sender, setA);
-                System.out.println("Messager max_value_self " + max_value_self + " from sender " + original_sender);
 
-                if (max_value_self <= max_value_sender){
-                    System.out.println(message.getAnswerD(max_value_self));
+
+                int max_value_self = maxSet(original_sender, setA);
+                //System.out.println("Messager max_value_self " + max_value_self + " from sender " + original_sender);
+
+                if (max_value_self <= max_value_sender+1){
+                    //System.out.println(message.getAnswerD(max_value_self));
                     return message.getAnswerD(max_value_self);
                 }else {
                     int[] list_message = roulettes[original_sender].getFrom(max_value_sender);
-                    System.out.println(message.getAnswerE(list_message));
+                    //System.out.println(message.getAnswerE(list_message));
                     return message.getAnswerE(list_message);
                 }
 

@@ -52,7 +52,7 @@ public class Roulette {
                 this.states[min_value%batch_size] = TO_SEND;
 
                 min_value++;
-                System.out.println("roulette min value " + min_value + " self_id " + self_id);
+                //System.out.println("roulette min value " + min_value + " self_id " + self_id);
             }
 
 

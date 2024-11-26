@@ -66,7 +66,7 @@ public class Sender extends Thread {
             Thread.yield();
 
             try {
-                TimeUnit.MILLISECONDS.sleep(500);
+                TimeUnit.MILLISECONDS.sleep(5);
             } catch (InterruptedException ignored) {}
 
 

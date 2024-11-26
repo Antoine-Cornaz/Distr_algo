@@ -23,7 +23,7 @@ public class Udp_receiver extends Thread {
     private DatagramPacket packet;
 
     public Udp_receiver(int port)  {
-        System.out.println("Udp_receiver port " + port);
+        //System.out.println("Udp_receiver port " + port);
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {

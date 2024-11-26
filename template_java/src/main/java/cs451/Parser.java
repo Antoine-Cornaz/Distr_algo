@@ -25,33 +25,33 @@ public class Parser {
 
         int argsNum = args.length;
         if (argsNum != Constants.ARG_LIMIT_CONFIG) {
-            System.out.println("B");
+            //System.out.println("B");
             help();
         }
 
         if (!idParser.populate(args[Constants.ID_KEY], args[Constants.ID_VALUE])) {
-            System.out.println("C");
+            //System.out.println("C");
             help();
         }
 
         if (!hostsParser.populate(args[Constants.HOSTS_KEY], args[Constants.HOSTS_VALUE])) {
-            System.out.println("D");
+            //System.out.println("D");
             help();
         }
 
         if (!hostsParser.inRange(idParser.getId())) {
-            System.out.println("E");
+            //System.out.println("E");
             help();
         }
 
         if (!outputParser.populate(args[Constants.OUTPUT_KEY], args[Constants.OUTPUT_VALUE])) {
-            System.out.println("F");
+            //System.out.println("F");
             help();
         }
 
-        System.out.println(args[Constants.CONFIG_VALUE]);
+        //System.out.println(args[Constants.CONFIG_VALUE]);
         if (!configParser.populate(args[Constants.CONFIG_VALUE])) {
-            System.out.println("G");
+            //System.out.println("G");
             help();
         }
     }
