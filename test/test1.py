@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 10
+NUMBER_MESSAGES = 3000000
 
 
 def main():
@@ -30,23 +30,34 @@ def main():
 
     # Call teacher test
     #subprocess.call(shlex.split('../tools/stress.py fifo -r RUNSCRIPT -l LOGSDIR -p 2 -m ' + str(NUMBER_MESSAGES)))
-    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 3 -m ' + str(NUMBER_MESSAGES)))
+    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 5 -m ' + str(NUMBER_MESSAGES)))
+
 
     v = []
     v.append(verify('01'))
     v.append(verify('02'))
     v.append(verify('03'))
+    v.append(verify('04'))
+    v.append(verify('05'))
 
+    total = 0
+    for i in range(5):
+        for j in range(5):
+            total += len(v[i][j+1])
+
+
+
+    """
     # Verify message delivred is message broadcasted
-    for i in range(3):
-        for j in range(3):
+    for i in range(5):
+        for j in range(5):
             if not v[i][j+1].issubset(v[j][0]):
                 diff = v[i][j+1].difference(v[j][0])
                 if len(diff) < 10:
                     print(diff)
 
     # Verify if one get it all get it
-    for i in range(3):
+    for i in range(5):
         if v[0][i] != v[i][1] or v[0][i] != v[i][2] or v[0][i] != v[i][3]:
             print(i, ", error not everyone get message", len(v[0][i]), len(v[i][1]), len(v[i][2]), len(v[i][3]))
 
@@ -82,7 +93,13 @@ def main():
     with open('../prof_test/proc02.stderr', 'r') as file:
         m = file.read()
         if m != "":
-            print(m)
+            print(m)"""
+            
+
+
+    #subprocess.call(shlex.split("wc -l ../prof_test/proc01.output ../prof_test/proc02.output ../prof_test/proc03.output ../prof_test/proc04.output ../prof_test/proc05.output"))
+
+    print("total received", total)
 
     print("Finish")
 
@@ -95,6 +112,8 @@ def verify(number):
     value_p1 = set()
     value_p2 = set()
     value_p3 = set()
+    value_p4 = set()
+    value_p5 = set()
 
     # Open the file in read mode
     with open('../prof_test/proc' + number + '.output', 'r') as file:
@@ -132,6 +151,7 @@ def verify(number):
                         if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p2:
                             print("Error previous one not there p2", line)
                         value_p2.add(line_words[2])
+
                 elif message_number == 3:
                     if message_number in value_p3:
                         print("Error value received 2 times p2:" + str(message_number))
@@ -139,6 +159,23 @@ def verify(number):
                         if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p3:
                             print("Error previous one not there p3", line)
                         value_p3.add(line_words[2])
+
+                elif message_number == 4:
+                    if message_number in value_p4:
+                        print("Error value received 2 times p2:" + str(message_number))
+                    else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p4:
+                            print("Error previous one not there p3", line)
+                        value_p4.add(line_words[2])
+
+                elif message_number == 5:
+                    if message_number in value_p5:
+                        print("Error value received 2 times p2:" + str(message_number))
+                    else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p5:
+                            print("Error previous one not there p3", line)
+                        value_p5.add(line_words[2])
+
                 else:
                     print("error value sender number " + message_number)
 
@@ -146,6 +183,6 @@ def verify(number):
                 print("ERROR, wrong number of argument, should be 2 or 3 but not " + len(line_words))
                 print("$"+line+"$")
 
-    return broadcast, value_p1, value_p2, value_p3
+    return broadcast, value_p1, value_p2, value_p3, value_p4, value_p5
 
 main()

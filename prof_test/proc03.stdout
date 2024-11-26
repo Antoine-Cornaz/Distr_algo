@@ -1,7 +1,6 @@
-../prof_test/config
-My PID: 15125
+My PID: 25683
 
-From a new terminal type `kill -SIGINT 15125` or `kill -SIGTERM 15125` to stop processing packets
+From a new terminal type `kill -SIGINT 25683` or `kill -SIGTERM 25683` to stop processing packets
 
 My ID: 3
 
@@ -19,6 +18,14 @@ Human-readable Port: 11002
 Human-readable IP: 127.0.0.1
 Human-readable Port: 11003
 
+4
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11004
+
+5
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11005
+
 
 Path to output:
 ===============
@@ -30,6 +37,10 @@ Path to config:
 
 Doing some initialization
 
-Udp_receiver port 11003
+Broadcasting and delivering messages...
+
+output parser:/home/dcl/Distr_algo/prof_test/proc03.output
+
+Start receiver
 Immediately stopping network packet processing.
 Writing output.
