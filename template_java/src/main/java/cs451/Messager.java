@@ -34,6 +34,12 @@ public class Messager {
 
     public Message receive(Message message){
         //System.out.println("message recu " + message.getType());
+
+        if (message.isAnswer() && message.getOriginal_id() != self_process){
+            substitutes[message.getOriginal_id()].receive_message(message);
+        }
+
+
         boolean isNew=false;
         switch (message.getType()) {
             case 'A':
@@ -42,12 +48,9 @@ public class Messager {
                     if (!isNew) continue;;
 
                     if (message.getOriginal_id() == self_process) {
-                        roulettes[message.getId_sender()].increase_value(message_number, Roulette.SENT);
+                        roulettes[message.getId_sender()].increase_value(message_number, Roulette.RECEIVED);
                         //System.out.println("update roulette sender: " + message.getId_sender());
                         update_to_confirm_if_majority(message_number);
-                    } else {
-                        System.out.println("substitute get \n" + message);
-                        substitutes[message.getOriginal_id()].get_message(message);
                     }
                 }
                 break;
@@ -57,7 +60,7 @@ public class Messager {
                 for (int message_number : message.getMessage_numbers()) {
                     isNew = setB.add(new IdMessage(message.getId_sender(), message_number));
                     if (!isNew) continue;
-                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.CONFIRMED);
+                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.MAJORITY_CONFIRMED);
                 }
 
                 break;
@@ -68,11 +71,12 @@ public class Messager {
 
             case 'D':
                 //TODO
-                substitutes[message.getOriginal_id()].get_message(message);
+                //substitutes[message.getOriginal_id()].receive_message(message);
                 break;
 
             case 'E':
                 // TODO
+                //substitutes[message.getOriginal_id()].receive_message(message);
                 break;
 
             case 'a':
@@ -159,10 +163,10 @@ public class Messager {
 
         for (int i = 0; i < number_processes; i++) {
             byte state = roulettes[i].getState(msg_number);
-            if (state == Roulette.SENT) counter_receive++;
+            if (state == Roulette.RECEIVED) counter_receive++;
 
             // If already confirmation stage doesn't need to update
-            if (state > Roulette.SENT) return;
+            if (state > Roulette.RECEIVED) return;
         }
 
         //System.out.println("counter_receive " + counter_receive);
@@ -170,7 +174,7 @@ public class Messager {
             // 50% < received
             // if majority received
             for (int i = 0; i < number_processes; i++) {
-                roulettes[i].increase_value(msg_number, Roulette.TO_CONFIRM);
+                roulettes[i].increase_value(msg_number, Roulette.MAJORITY);
             }
         }
     }

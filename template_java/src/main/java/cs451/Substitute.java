@@ -11,11 +11,10 @@ public class Substitute {
     private final int number_processes;
     private final int substitute_id;
     private final Set<IdMessage> messages;
-    private final int max_value;
 
     private final Roulette[] roulettes;
     private final int[] min_value_other;
-    private int max_value_min_everyone;
+    private int max_value_principal_sent;
 
 
     public Substitute(int self_id, int number_processes, int substitute_id, Set<IdMessage> messages, int max_value){
@@ -23,10 +22,9 @@ public class Substitute {
         this.number_processes = number_processes;
         this.substitute_id = substitute_id;
         this.messages = messages;
-        this.max_value = max_value;
         this.roulettes = new Roulette[number_processes];
         this.min_value_other = new int[number_processes]; // not include
-        this.max_value_min_everyone = max_value;
+        this.max_value_principal_sent = max_value;
         for (int i = 0; i < number_processes; i++) {
             this.min_value_other[i]=0;
         }
@@ -42,7 +40,8 @@ public class Substitute {
                 // Send basic message from other source
                 int length_before = messages.size();
                 roulettes[i].add_messages(messages, substitute_id);
-                //System.out.println(i + " info roulettes " + roulettes[i].getMin() + " " + roulettes[i].getMax_value_sent());
+                System.out.println(i + " info roulettes " + roulettes[i].getMin()
+                                    + " " + roulettes[i].getMax_value_sent());
                 int length_after = messages.size();
                 for (int j = length_before; j < length_after; j++) {
                     Message message = messages.get(j);
@@ -55,29 +54,33 @@ public class Substitute {
             int number_message_added = number_message_after - number_message_before;
 
             if (number_message_added == 0){
-                Message message = new Message(i, 'd', self_id, substitute_id, new int[]{max_value});
+                Message message = new Message(i, 'd', self_id, substitute_id, new int[]{max_value_principal_sent});
                 messages.add(message);
             }
         }
     }
 
-    public void get_message(Message message){
+    public void receive_message(Message message){
         //assert message.getType() == 'D' || message.getType() == 'E';
         assert message.getOriginal_id() == substitute_id;
-        // TODO
 
         switch (message.getType()){
             case 'A':
                 for (int message_number : message.getMessage_numbers()) {
-                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.SENT);
+                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.RECEIVED);
+                    System.out.println("Substitute increase " + message_number + " to  " + Roulette.RECEIVED);
                     update_to_confirm_if_majority(message_number);
                 }
                 break;
 
             case 'B':
                 for (int message_number : message.getMessage_numbers()) {
-                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.CONFIRMED);
+                    roulettes[message.getId_sender()].increase_value(message_number, Roulette.MAJORITY_CONFIRMED);
+                    System.out.println("Substitute increase " + message_number + " to  " + Roulette.MAJORITY_CONFIRMED);
                 }
+                break;
+
+            case 'C':
                 break;
 
 
@@ -87,7 +90,7 @@ public class Substitute {
                 int id = message.getId_sender();
                 this.min_value_other[id] = min_value;
                 System.out.println("Substitute get message D from sender " + id + " min value " + min_value);
-                roulettes[id] = new Roulette(min_value, max_value_min_everyone, id, BATCH_SIZE, self_id);
+                roulettes[id] = new Roulette(min_value, max_value_principal_sent+1, id, BATCH_SIZE, self_id);
                 new_member_confirm_majority(min_value);
                 break;
             case 'E':
@@ -96,13 +99,26 @@ public class Substitute {
                 }
 
                 System.out.println("Substitute get message E");
+                boolean increased = false;
                 for (Integer integer: message.getMessage_numbers()){
-                    if(integer == max_value_min_everyone + 1){
-                        max_value_min_everyone++;
+                    if(integer == max_value_principal_sent + 1){
+                        max_value_principal_sent++;
+                        increased = true;
                     }
                 }
-                break;
 
+                if (increased){
+                    // max_value increase
+                    for (int i = 0; i < number_processes; i++) {
+                        if (roulettes[i] == null) continue;
+
+                        // Increase all roulette to send new messages.
+                        roulettes[i].setMax_value(max_value_principal_sent+1);
+                    }
+                    System.out.println("max value increased to " + (max_value_principal_sent+1));
+                }
+
+                break;
 
 
             default:
@@ -116,14 +132,15 @@ public class Substitute {
         for (int i = 0; i < number_processes; i++) {
             if (roulettes[i] == null) continue;
 
-            System.out.println(i + " Substitute min this  " + roulettes[i].getMin());
-            if(roulettes[i].getMin() < minEveryone){
-                minEveryone = roulettes[i].getMin();
+            int min_current = roulettes[i].getMin();
+            System.out.println(i + " Substitute min this  " + min_current);
+            if(min_current < minEveryone){
+                minEveryone = min_current;
             }
         }
 
         System.out.println("Substitute min new process " + min + " min_everyone " + minEveryone);
-        for (int i = minEveryone; i < min+1; i++) {
+        for (int i = minEveryone; i < max_value_principal_sent; i++) {
             update_to_confirm_if_majority(i);
         }
     }
@@ -135,12 +152,13 @@ public class Substitute {
         for (int i = 0; i < number_processes; i++) {
             if (roulettes[i] == null) continue;
             byte state = roulettes[i].getState(msg_number);
-            if (state == Roulette.SENT) counter_receive++;
+            if (state == Roulette.RECEIVED) counter_receive++;
 
             // If already confirmation stage doesn't need to update
-            if (state > Roulette.SENT) {
+            if (Roulette.MAJORITY <= state) {
+                System.out.println("Someone already in confirmation stage");
                 setMajority(msg_number);// TODO change only check if new member
-                //return;
+                break;
             }
         }
 
@@ -149,6 +167,7 @@ public class Substitute {
         if (counter_receive > number_processes/2){
             // 50% < received
             // if majority received
+            System.out.println("new majority");
             setMajority(msg_number);
         }
     }
@@ -157,10 +176,8 @@ public class Substitute {
         System.out.println("majority in substitute " + self_id + " msg_n " + msg_number);
         for (int i = 0; i < number_processes; i++) {
             if(roulettes[i]!= null) {
-                roulettes[i].increase_value(msg_number, Roulette.TO_CONFIRM);
+                roulettes[i].increase_value(msg_number, Roulette.MAJORITY);
             }
         }
     }
-
-
 }

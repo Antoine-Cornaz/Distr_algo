@@ -65,10 +65,10 @@ public class Sender extends Thread {
             // Say to the OS if you want to pause it's the right time
             Thread.yield();
 
-            /*try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {}
-             */
+            try {
+                TimeUnit.MILLISECONDS.sleep(500);
+            } catch (InterruptedException ignored) {}
+
 
             detector.update_time();
 

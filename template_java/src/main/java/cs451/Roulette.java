@@ -15,10 +15,10 @@ public class Roulette {
     
     private final byte[] states;
 
-    public static final byte SEND = 0;
-    public static final byte SENT = 1;
-    public static final byte TO_CONFIRM = 2;
-    public static final byte CONFIRMED = 3;
+    public static final byte TO_SEND = 0;
+    public static final byte RECEIVED = 1;
+    public static final byte MAJORITY = 2;
+    public static final byte MAJORITY_CONFIRMED = 3;
     
     public Roulette(int min_value, int max_value, int peer_id, int batch_size, int self_id){
         this.min_value = min_value; // Included
@@ -28,12 +28,15 @@ public class Roulette {
         this.self_id = self_id;
 
         this.states = new byte[batch_size];
+        for (int i = 0; i < batch_size; i++) {
+            states[i] = 0;
+        }
     }
 
     public void increase_value(int msg_number, byte state){
 
-        assert SEND <= state;
-        assert state <= CONFIRMED;
+        assert TO_SEND <= state;
+        assert state <= MAJORITY_CONFIRMED;
 
         assert 0 <= msg_number;
         assert msg_number < max_value;
@@ -44,23 +47,24 @@ public class Roulette {
         if (this.states[msg_number%batch_size] < state){
             this.states[msg_number%batch_size] = state;
 
-            while (this.states[min_value%batch_size] >= CONFIRMED){
+            while (this.states[min_value%batch_size] >= MAJORITY_CONFIRMED){
 
-                this.states[min_value%batch_size] = SEND;
+                this.states[min_value%batch_size] = TO_SEND;
 
                 min_value++;
-                //System.out.println("roulette min value " + min_value);
+                System.out.println("roulette min value " + min_value + " self_id " + self_id);
             }
 
 
         }
     }
 
-    public void setMax_value(int max_value){
-        this.max_value = max_value;
-    }
     public int getMax_value_sent(){
         return min(min_value+batch_size-1, max_value-1);
+    }
+
+    public void setMax_value(int max_value){
+        this.max_value = max_value;
     }
 
     public void add_messages(List<Message> messageList, int original_sender){
@@ -68,7 +72,7 @@ public class Roulette {
         add_messages_type(messageList, 'a', (byte) 0, original_sender);
         add_messages_type(messageList, 'b', (byte) 2, original_sender);
         int size_after = messageList.size();
-        //TODO add ping when no more message
+
         if (size_after - size_before == 0){
             Message message = new Message(peer_id, 'c', self_id, original_sender, new int[]{42});
             messageList.add(message);
@@ -113,8 +117,8 @@ public class Roulette {
         assert msg_number < max_value;
         assert msg_number < min_value + batch_size;
 
-        if (msg_number < min_value) return CONFIRMED; // 3
-        if (min_value + batch_size <= msg_number) return SEND;// 0
+        if (msg_number < min_value) return MAJORITY_CONFIRMED; // 3
+        if (min_value + batch_size <= msg_number) return TO_SEND;// 0
 
         return states[msg_number % batch_size];
     }
@@ -132,21 +136,12 @@ public class Roulette {
         return min_value;
     }
 
-    public int getMinGot(){
-        int i = min_value;
-        while (SENT <= getState(i)){
-            i++;
-        }
-
-        return i;
-    }
-
     // Return a list with value 8,9,10,11 if max_value is 8 and has message 8,9,10,11 and not 12.
     public int[] getFrom(int max_value){
         int[] messages = new int[MAX_MESSAGE_PER_PACKET];
         for (int i = 0; i < MAX_MESSAGE_PER_PACKET; i++) {
             byte state = getState(max_value + i);
-            if (state >= SENT){
+            if (state >= RECEIVED){
                 messages[i] = max_value + i;
             }else {
                 System.arraycopy(messages, 0, messages, 0, i);

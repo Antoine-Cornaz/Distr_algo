@@ -86,7 +86,7 @@ public class Message {
         return message_numbers;
     }
 
-    public boolean isAck(){
+    public boolean isAnswer(){
         return type == 'A' || type == 'B' || type == 'C' || type == 'D' || type == 'E';
     }
 
