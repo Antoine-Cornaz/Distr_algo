@@ -59,14 +59,13 @@ public class Sender extends Thread {
                 int port = list_port[m.getId()];
                 if (!isRunning) break;
                 udpSender.send(m.getContent(), ip, port);
-                //System.out.println("message sent " + m);
             }
 
             // Say to the OS if you want to pause it's the right time
             Thread.yield();
 
             try {
-                TimeUnit.MILLISECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(500);
             } catch (InterruptedException ignored) {}
 
 

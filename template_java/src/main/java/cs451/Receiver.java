@@ -45,11 +45,11 @@ public class Receiver extends Thread{
             detector.update(message.getId_sender());
             Message answer = messager.receive(message);
 
-            /*if (message.getType() != 'c' && message.getType() != 'C'){
+            if (message.getType() != 'c' && message.getType() != 'C'){
                 System.out.println("Recu " + message);
                 System.out.println("Send " + answer);
                 System.out.println();
-            }*/
+            }
 
 
             if(answer != null){

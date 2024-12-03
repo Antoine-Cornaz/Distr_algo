@@ -17,14 +17,14 @@ public class Substitute {
     private int max_value_principal_sent;
 
 
-    public Substitute(int self_id, int number_processes, int substitute_id, Set<IdMessage> messages, int max_value){
+    public Substitute(int self_id, int number_processes, int substitute_id, Set<IdMessage> messages){
         this.self_id = self_id;
         this.number_processes = number_processes;
         this.substitute_id = substitute_id;
         this.messages = messages;
         this.roulettes = new Roulette[number_processes];
         this.min_value_other = new int[number_processes]; // not include
-        this.max_value_principal_sent = max_value;
+        this.max_value_principal_sent = 0;
         for (int i = 0; i < number_processes; i++) {
             this.min_value_other[i]=0;
         }
@@ -99,7 +99,7 @@ public class Substitute {
                 //System.out.println("Substitute get message E");
                 boolean increased = false;
                 for (Integer integer: message.getMessage_numbers()){
-                    if(integer == max_value_principal_sent + 1){
+                    if(integer == max_value_principal_sent){
                         max_value_principal_sent++;
                         increased = true;
                     }

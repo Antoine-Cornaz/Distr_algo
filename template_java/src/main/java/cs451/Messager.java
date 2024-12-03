@@ -130,7 +130,7 @@ public class Messager {
         ArrayList<Message> messageList = new ArrayList<>();
         for (Integer id: manage_id){
             if (substitutes[id] == null){
-                substitutes[id] = new Substitute(self_process, number_processes, id, setA, roulettes[id].getMin());
+                substitutes[id] = new Substitute(self_process, number_processes, id, setA);
             }
 
             substitutes[id].addMessages(messageList);
@@ -186,7 +186,7 @@ public class Messager {
     public void close(){
         myWriter.close();
         //print_state();
-        printMessages();
+        //printMessages();
     }
 
 
