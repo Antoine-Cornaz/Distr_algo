@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 30
+NUMBER_MESSAGES = 3000
 
 
 def main():
