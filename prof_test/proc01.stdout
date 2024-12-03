@@ -1,6 +1,6 @@
-My PID: 25681
+My PID: 3651
 
-From a new terminal type `kill -SIGINT 25681` or `kill -SIGTERM 25681` to stop processing packets
+From a new terminal type `kill -SIGINT 3651` or `kill -SIGTERM 3651` to stop processing packets
 
 My ID: 1
 
@@ -25,6 +25,14 @@ Human-readable Port: 11004
 5
 Human-readable IP: 127.0.0.1
 Human-readable Port: 11005
+
+6
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11006
+
+7
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11007
 
 
 Path to output:

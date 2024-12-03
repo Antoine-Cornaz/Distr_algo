@@ -100,6 +100,7 @@ public class Messager {
 
             case 'd':
                 // TODO
+                //System.out.println("got max_value " + message.getMessage_numbers()[0]);
                 int max_value_sender = message.getMessage_numbers()[0];
                 int original_sender = message.getOriginal_id();
 
@@ -185,6 +186,7 @@ public class Messager {
     public void close(){
         myWriter.close();
         //print_state();
+        printMessages();
     }
 
 
@@ -204,6 +206,16 @@ public class Messager {
         }
 
         return i;
+    }
+
+    private void printMessages(){
+        for (IdMessage message: setA){
+            System.out.println(message);
+        }
+
+        for (IdMessage message: setB){
+            System.out.println(message);
+        }
     }
 
     /*

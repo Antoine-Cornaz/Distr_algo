@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 3000000
+NUMBER_MESSAGES = 30
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
 
     # Call teacher test
     #subprocess.call(shlex.split('../tools/stress.py fifo -r RUNSCRIPT -l LOGSDIR -p 2 -m ' + str(NUMBER_MESSAGES)))
-    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 5 -m ' + str(NUMBER_MESSAGES)))
+    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 7 -m ' + str(NUMBER_MESSAGES)))
 
 
     v = []
@@ -39,15 +39,18 @@ def main():
     v.append(verify('03'))
     v.append(verify('04'))
     v.append(verify('05'))
+    v.append(verify('06'))
+    v.append(verify('07'))
 
     total = 0
-    for i in range(5):
-        for j in range(5):
+    for i in range(7):
+        for j in range(7):
+            print(len(v[i][j+1]))
             total += len(v[i][j+1])
 
 
 
-    """
+
     # Verify message delivred is message broadcasted
     for i in range(5):
         for j in range(5):
@@ -93,7 +96,7 @@ def main():
     with open('../prof_test/proc02.stderr', 'r') as file:
         m = file.read()
         if m != "":
-            print(m)"""
+            print(m)
             
 
 
@@ -114,6 +117,8 @@ def verify(number):
     value_p3 = set()
     value_p4 = set()
     value_p5 = set()
+    value_p6 = set()
+    value_p7 = set()
 
     # Open the file in read mode
     with open('../prof_test/proc' + number + '.output', 'r') as file:
@@ -154,7 +159,7 @@ def verify(number):
 
                 elif message_number == 3:
                     if message_number in value_p3:
-                        print("Error value received 2 times p2:" + str(message_number))
+                        print("Error value received 2 times p3:" + str(message_number))
                     else:
                         if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p3:
                             print("Error previous one not there p3", line)
@@ -162,20 +167,35 @@ def verify(number):
 
                 elif message_number == 4:
                     if message_number in value_p4:
-                        print("Error value received 2 times p2:" + str(message_number))
+                        print("Error value received 2 times p4:" + str(message_number))
                     else:
                         if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p4:
-                            print("Error previous one not there p3", line)
+                            print("Error previous one not there p4", line)
                         value_p4.add(line_words[2])
 
                 elif message_number == 5:
                     if message_number in value_p5:
-                        print("Error value received 2 times p2:" + str(message_number))
+                        print("Error value received 2 times p5:" + str(message_number))
                     else:
                         if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p5:
-                            print("Error previous one not there p3", line)
+                            print("Error previous one not there p5", line)
                         value_p5.add(line_words[2])
 
+                elif message_number == 6:
+                    if message_number in value_p6:
+                        print("Error value received 2 times p6:" + str(message_number))
+                    else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p6:
+                            print("Error previous one not there p6", line)
+                        value_p6.add(line_words[2])
+
+                elif message_number == 7:
+                    if message_number in value_p7:
+                        print("Error value received 2 times p7:" + str(message_number))
+                    else:
+                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p7:
+                            print("Error previous one not there p7", line)
+                        value_p7.add(line_words[2])
                 else:
                     print("error value sender number " + message_number)
 
@@ -183,6 +203,6 @@ def verify(number):
                 print("ERROR, wrong number of argument, should be 2 or 3 but not " + len(line_words))
                 print("$"+line+"$")
 
-    return broadcast, value_p1, value_p2, value_p3, value_p4, value_p5
+    return broadcast, value_p1, value_p2, value_p3, value_p4, value_p5, value_p6, value_p7
 
 main()

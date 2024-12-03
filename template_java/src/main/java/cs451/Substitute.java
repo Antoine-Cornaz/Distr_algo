@@ -88,7 +88,7 @@ public class Substitute {
                 int id = message.getId_sender();
                 this.min_value_other[id] = min_value;
                 //System.out.println("Substitute get message D from sender " + id + " min value " + min_value);
-                roulettes[id] = new Roulette(min_value, max_value_principal_sent+1, id, BATCH_SIZE, self_id);
+                roulettes[id] = new Roulette(min_value, max_value_principal_sent, id, BATCH_SIZE, self_id);
                 new_member_confirm_majority(min_value);
                 break;
             case 'E':
