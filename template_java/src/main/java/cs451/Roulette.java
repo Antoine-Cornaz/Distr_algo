@@ -5,7 +5,7 @@ import java.util.List;
 
 import static cs451.Constants.MAX_MESSAGE_PER_PACKET;
 import static java.lang.Math.min;
-
+/*
 public class Roulette {
     private int min_value;
     private int max_value;
@@ -201,5 +201,6 @@ public class Roulette {
             System.out.println("id " + m.getId() + " content " + m.getContent());
         }
     }
-    */
+
 }
+*/

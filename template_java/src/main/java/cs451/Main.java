@@ -5,7 +5,7 @@ import java.lang.System;
 
 import static cs451.Constants.INITIAL_PING_TIME_MS;
 
-
+/*
 public class Main {
 
     static Receiver receiver;
@@ -124,3 +124,5 @@ public class Main {
         receiver = new Receiver(fileName, list_ports, self_id, messager, detector);
     }
 }
+
+ */

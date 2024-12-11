@@ -3,7 +3,7 @@ package cs451;
 import java.lang.String;
 import java.io.FileWriter;   // Import the FileWriter class
 import java.io.IOException;  // Import the IOException class to handle errors
-
+/*
 public class Receiver extends Thread{
 
     private final Udp_receiver udpReceiver;
@@ -72,3 +72,5 @@ public class Receiver extends Thread{
         messager.close();
     }
 }
+
+ */

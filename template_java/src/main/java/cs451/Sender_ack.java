@@ -2,7 +2,7 @@ package cs451;
 
 import static cs451.Constants.SEPARATOR;
 import static cs451.Constants.SEPARATOR_C;
-
+/*
 public class Sender_ack extends Thread{
 
     private final Udp_receiver udpReceiver;
@@ -59,3 +59,6 @@ public class Sender_ack extends Thread{
     }
 
 }
+
+
+ */

@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 3000
+NUMBER_MESSAGES = 2
 
 
 def main():
@@ -30,79 +30,37 @@ def main():
 
     # Call teacher test
     #subprocess.call(shlex.split('../tools/stress.py fifo -r RUNSCRIPT -l LOGSDIR -p 2 -m ' + str(NUMBER_MESSAGES)))
-    subprocess.call(shlex.split('../tools/stress.py fifo -r ../template_java/run.sh -l ../prof_test/ -p 7 -m ' + str(NUMBER_MESSAGES)))
+    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p 3 -n 2 -v 22 -d 70'))
+    #./stress.py agreement -r RUNSCRIPT -l LOGSDIR -p PROCESSES -n PROPOSALS -v PROPOSAL_MAX_VALUES -d PROPOSALS_DISTINCT_VALUES
+
+    """RUNSCRIPT is the path to run.sh. Remember to build your project first!
+    • LOGSDIR is the path to a directory where stdout/stderr and output of each process will be stored. It
+    also stores generated HOSTS and CONFIG files. The directory must exist as it will not be created for you.
+        • PROCESSES (for perfect, fifo and agreement) specifies the number of processes spawn during validation.
+    • MESSAGES (for perfect and fifo) specifies the number of messages each process is broadcasting.
+    • PROPOSALS (for agreement) specifies the number of proposals each process is proposing"""
 
 
     v = []
     v.append(verify('01'))
     v.append(verify('02'))
     v.append(verify('03'))
-    v.append(verify('04'))
-    v.append(verify('05'))
-    v.append(verify('06'))
-    v.append(verify('07'))
 
-    total = 0
-    for i in range(7):
-        for j in range(7):
-            print(len(v[i][j+1]))
-            total += len(v[i][j+1])
+    assert len(v[0]) == len(v[1]) == len(v[2]) == 2
+    proposal_number = len(v[0])
 
+    for i in range(proposal_number):
+        if not (v[0][i].issubset(v[1][i]) or (v[1][i].issubset(v[0][i]))):
+            print(f"ERROR, set {i} not super or subset for process 0, 1")
 
+    for i in range(proposal_number):
+        if not (v[0][i].issubset(v[2][i]) or (v[2][i].issubset(v[0][i]))):
+            print(f"ERROR, set {i} not super or subset for process 0, 2")
 
+    for i in range(proposal_number):
+        if not (v[1][i].issubset(v[2][i]) or (v[2][i].issubset(v[1][i]))):
+            print(f"ERROR, set {i} not super or subset for process 1, 2")
 
-    # Verify message delivred is message broadcasted
-    for i in range(5):
-        for j in range(5):
-            if not v[i][j+1].issubset(v[j][0]):
-                diff = v[i][j+1].difference(v[j][0])
-                if len(diff) < 10:
-                    print(diff)
-
-    # Verify if one get it all get it
-    for i in range(5):
-        if v[0][i] != v[i][1] or v[0][i] != v[i][2] or v[0][i] != v[i][3]:
-            print(i, ", error not everyone get message", len(v[0][i]), len(v[i][1]), len(v[i][2]), len(v[i][3]))
-
-    # Verify no 0 or > number message
-    for i in range(3):
-        for j in range(4):
-            for m in v[i][j]:
-                m = int(m)
-
-                if not (0 < m and m <= NUMBER_MESSAGES):
-                    #i=receiver, j=sender 0 if broadcast, 1,2,3 if receive
-                    print("subset contain message not in list", i, j, m, "i=receiver, j=sender 0 if broadcast, 1,2,3 if receive")
-
-    for i in range(3):
-        print(i, "broadcast", len(v[i][0]) / NUMBER_MESSAGES * 100, "%")
-
-    for i in range(3):
-        value = 0
-        for j in range(3):
-            value += len(v[j][i+1])
-        print(i, "deliver", value / NUMBER_MESSAGES/3 * 100, "%")
-
-    with open('../prof_test/proc01.stderr', 'r') as file:
-        m = file.read()
-        if m != "":
-            print(m)
-
-    with open('../prof_test/proc02.stderr', 'r') as file:
-        m = file.read()
-        if m != "":
-            print(m)
-
-    with open('../prof_test/proc02.stderr', 'r') as file:
-        m = file.read()
-        if m != "":
-            print(m)
-            
-
-
-    #subprocess.call(shlex.split("wc -l ../prof_test/proc01.output ../prof_test/proc02.output ../prof_test/proc03.output ../prof_test/proc04.output ../prof_test/proc05.output"))
-
-    print("total received", total)
 
     print("Finish")
 
@@ -111,98 +69,47 @@ def main():
 
 def verify(number):
 
-    broadcast = set()
-    value_p1 = set()
-    value_p2 = set()
-    value_p3 = set()
-    value_p4 = set()
-    value_p5 = set()
-    value_p6 = set()
-    value_p7 = set()
+    propositions = []
+    decisions = []
+
 
     # Open the file in read mode
+    line_number = -1
+    with open('../prof_test/proc' + number + '.config', 'r') as file:
+        # Read each line in the file
+        for line in file:
+            line_number += 1
+            #Don't check first line because config.
+            if line_number == 0:
+                continue
+
+            set_proposition = set()
+            line_words = line.split()
+            for prop in line_words:
+                set_proposition.add(prop)
+            propositions.append(set_proposition)
+
+    print(number, "proposition", propositions)
+
+    # Open the file in read mode
+    line_number = -1
     with open('../prof_test/proc' + number + '.output', 'r') as file:
         # Read each line in the file
         for line in file:
+            line_number += 1
             line_words = line.split()
-            if len(line_words) == 2:
-                if not line_words[0] == "b":
-                    print("Error 2 args but first char is not b $" + str(line_words[0]) + "$", )
-                    print("$"+line+"$")
 
-                if line_words[1] != '1' and str(int(line_words[1])-1) not in broadcast:
-                    print("Error previous one not there broadcast", line_words[1])
-                broadcast.add(line_words[1])
-            elif len(line_words) == 3:
-                if not line_words[0] == "d":
-                    print("Error 3 args but first char is not d $" + str(line_words[0]) + "$", )
-                    print("$"+line+"$")
+            set_decision = set()
+            for decis in line_words:
+                is_new = set_decision.add(decis)
+                if not is_new:
+                    print("ERROR not a set of decided value because 2 times same value", decis, number)
 
-                message_number = int(line_words[1])
-                if message_number == 1:
 
-                    if message_number in value_p1:
-                        print("Error value received 2 times p1:" + str(message_number))
+            if not set_proposition.issubset(set_decision):
+                print("ERROR decision is not subset of proposition", set_proposition not in set_decision, number)
 
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p1:
-                            print("Error previous one not there p1", line)
-                        value_p1.add(line_words[2])
 
-                elif message_number == 2:
-                    if message_number in value_p2:
-                        print("Error value received 2 times p2:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p2:
-                            print("Error previous one not there p2", line)
-                        value_p2.add(line_words[2])
-
-                elif message_number == 3:
-                    if message_number in value_p3:
-                        print("Error value received 2 times p3:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p3:
-                            print("Error previous one not there p3", line)
-                        value_p3.add(line_words[2])
-
-                elif message_number == 4:
-                    if message_number in value_p4:
-                        print("Error value received 2 times p4:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p4:
-                            print("Error previous one not there p4", line)
-                        value_p4.add(line_words[2])
-
-                elif message_number == 5:
-                    if message_number in value_p5:
-                        print("Error value received 2 times p5:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p5:
-                            print("Error previous one not there p5", line)
-                        value_p5.add(line_words[2])
-
-                elif message_number == 6:
-                    if message_number in value_p6:
-                        print("Error value received 2 times p6:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p6:
-                            print("Error previous one not there p6", line)
-                        value_p6.add(line_words[2])
-
-                elif message_number == 7:
-                    if message_number in value_p7:
-                        print("Error value received 2 times p7:" + str(message_number))
-                    else:
-                        if line_words[2] != '1' and str(int(line_words[2])-1) not in value_p7:
-                            print("Error previous one not there p7", line)
-                        value_p7.add(line_words[2])
-                else:
-                    print("error value sender number " + message_number)
-
-            else:
-                print("ERROR, wrong number of argument, should be 2 or 3 but not " + len(line_words))
-                print("$"+line+"$")
-
-    return broadcast, value_p1, value_p2, value_p3, value_p4, value_p5, value_p6, value_p7
+    return decisions
 
 main()

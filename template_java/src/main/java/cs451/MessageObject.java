@@ -1,58 +1,47 @@
 package cs451;
-
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class MessageObject {
-    private int message_number;
-    private int id_sender;
+    private final int shot;
+    private final Set<Integer> decision;
 
-    // Constructor
-    // If id is -1, it's a broadcast message
-    public MessageObject(int id_sender, int message_number) {
-        this.message_number = message_number;
-        this.id_sender = id_sender;
+    // Parameterized constructor
+    public MessageObject(int shot, Set<Integer> decision) {
+        this.shot = shot;
+        this.decision = decision;
     }
 
-    // Getters
-    public int getMessage_number() {
-        return message_number;
+    // Getter for 'shot'
+    public int getShot() {
+        return shot;
     }
 
-    public int getId_sender() {
-        return id_sender;
+    // Getter for 'decision'
+    public Set<Integer> getDecision() {
+        return decision;
     }
 
-    // Setters
-    public void setMessage_number(int message_number) {
-        this.message_number = message_number;
-    }
-
-    public void setId_sender(int id_sender) {
-        this.id_sender = id_sender;
-    }
-
-    // Overriding equals()
+    // Equal method
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true; // Same object reference
-        if (o == null || getClass() != o.getClass()) return false; // Null or different class
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         MessageObject that = (MessageObject) o;
-        return message_number == that.message_number && id_sender == that.id_sender; // Compare fields
+        return shot == that.shot;
     }
 
-    // Overriding hashCode()
     @Override
     public int hashCode() {
-        return Objects.hash(message_number, id_sender); // Generate hash code using fields
+        return Objects.hash(shot);
     }
 
-    // Optional: Override toString() for better readability
     @Override
     public String toString() {
-        return "Message_Object{" +
-                "message=" + message_number +
-                ", id=" + id_sender +
+        return "MessageObject{" +
+                "shot=" + shot +
+                ", decision=" + decision +
                 '}';
     }
 }

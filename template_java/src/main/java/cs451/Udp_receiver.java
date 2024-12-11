@@ -16,6 +16,7 @@ I use this udp packet example
 https://www.baeldung.com/udp-in-java
  */
 
+/*
 public class Udp_receiver extends Thread {
 
     private final DatagramSocket socket;
@@ -72,3 +73,4 @@ public class Udp_receiver extends Thread {
         socket.close();
     }
 }
+*/

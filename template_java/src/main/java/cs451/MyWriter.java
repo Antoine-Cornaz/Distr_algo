@@ -3,14 +3,12 @@ package cs451;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MyWriter {
 
     private final Writer writer;
     private final Set<MessageObject> messageGot;
-    private final Set<MessageObject> messageDelivered;
 
     public MyWriter(String fileName){
         try {
@@ -21,61 +19,36 @@ public class MyWriter {
         }
 
         messageGot = new HashSet<>();
-        messageDelivered = new HashSet<>();
     }
 
     // Got a new message, mo.id == -1 if broadcast
-    public void newDeliverMessage(MessageObject mo){
+    public void newDeliverMessage(int shot, Set<Integer> decision){
+        MessageObject mo = new MessageObject(shot, decision);
         boolean isNew = messageGot.add(mo);
 
         if (isNew){
-            if (mo.getMessage_number() == 0){
-                deliver(mo);
+            if (mo.getShot() == 0){
+                writeDeliver(mo);
             }else {
-                MessageObject previous_message = new MessageObject(mo.getId_sender(), mo.getMessage_number() - 1);
-                if (messageDelivered.contains(previous_message)){
-                    deliver(mo);
+                MessageObject previous_message = new MessageObject(shot-1, Set.of());
+                if (messageGot.contains(previous_message)){
+                    writeDeliver(mo);
                 }
             }
         }
     }
 
-
-
-    private void deliver(MessageObject mo){
-        if(mo.getId_sender() == -1){
-            // If id is -1, it's a broadcast message
-            writeBroadCast(mo.getMessage_number());
-        }else{
-            writeDeliver(mo);
-        }
-
-        messageDelivered.add(mo);
-
-
-        MessageObject next_message = new MessageObject(mo.getId_sender(), mo.getMessage_number() + 1);
-        if (messageGot.contains(next_message)){
-            deliver(next_message);
-        }
-    }
-
-    public void writeBroadCast(int msg_number){
-        //System.out.println("Write broadcast");
-
-        // shift bc msg start at 1.
-        String message = "b " + (msg_number+1) + "\n";
-        try {
-            writer.write(message);
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-    }
-
     private void writeDeliver(MessageObject mo){
-        //System.out.println("write deliver sender: " + sender + " msg: " + msg_number);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mo.getDecision().size(); i++) {
+            if (i > 0) {
+                sb.append(" ");
+            }
+            sb.append(mo.getDecision().iterator().next());
+        }
 
-        // shift bc msg and sender start at 1.
-        String message = "d " + (mo.getId_sender()+1) + " " + (mo.getMessage_number()+1) + "\n";
+
+        String message = sb.toString();
         try {
             writer.write(message);
         } catch (IOException e) {

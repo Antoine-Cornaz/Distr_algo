@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import static cs451.Constants.BATCH_SIZE;
-
+/*
 public class Substitute {
 
     private final int self_id;
@@ -45,7 +45,7 @@ public class Substitute {
                     Message message = messages.get(j);
                     /*if (message.getType() != 'c' && message.getType() != 'C') {
                         System.out.println("substitute " + message);
-                    }*/
+                    }
                 }
             }
             int number_message_after = messages.size();
@@ -179,3 +179,6 @@ public class Substitute {
         }
     }
 }
+
+
+ */

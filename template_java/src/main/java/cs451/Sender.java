@@ -13,6 +13,7 @@ Will use Udp_sender to send message 1 by one.
 
 //for thread
 // https://www.geeksforgeeks.org/multithreading-in-java/
+/*
 public class Sender extends Thread {
     private final int[] list_port;
     private final String[] list_ip;
@@ -102,3 +103,5 @@ public class Sender extends Thread {
         udpSender.close();
     }
 }
+
+ */
