@@ -1,6 +1,6 @@
-My PID: 1563
+My PID: 1663
 
-From a new terminal type `kill -SIGINT 1563` or `kill -SIGTERM 1563` to stop processing packets
+From a new terminal type `kill -SIGINT 1663` or `kill -SIGTERM 1663` to stop processing packets
 
 My ID: 1
 
@@ -18,6 +18,30 @@ Human-readable Port: 11002
 Human-readable IP: 127.0.0.1
 Human-readable Port: 11003
 
+4
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11004
+
+5
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11005
+
+6
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11006
+
+7
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11007
+
+8
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11008
+
+9
+Human-readable IP: 127.0.0.1
+Human-readable Port: 11009
+
 
 Path to output:
 ===============
@@ -29,55 +53,16 @@ Path to config:
 
 Doing some initialization
 
+number process 9
+Udp_receiver port 11001
 Broadcasting and delivering messages...
 
 output parser:/home/dcl/Distr_algo/prof_test/proc01.output
 
 Start receiver
-Recu 1 (1)  -> 0 type: a packet: [0, 1]
-Send 0 (1)  -> 1 type: A packet: [0, 1]
-
-Recu 1 (1)  -> 0 type: a packet: [0, 1]
-Send 0 (1)  -> 1 type: A packet: [0, 1]
-
-Recu 2 (2)  -> 0 type: a packet: [0, 1]
-Send 0 (2)  -> 2 type: A packet: [0, 1]
-
-Recu 1 (1)  -> 0 type: a packet: [0, 1]
-Send 0 (1)  -> 1 type: A packet: [0, 1]
-
-Recu 2 (2)  -> 0 type: b packet: [0, 1]
-Send 0 (2)  -> 2 type: B packet: [0, 1]
-
-Recu 0 (0)  -> 0 type: a packet: [0, 1]
-Send 0 (0)  -> 0 type: A packet: [0, 1]
-
-Recu 2 (0)  -> 0 type: A packet: [0, 1]
-Send null
-
-Recu 0 (0)  -> 0 type: A packet: [0, 1]
-Send null
-
-Recu 0 (0)  -> 0 type: b packet: [0, 1]
-Send 0 (0)  -> 0 type: B packet: [0, 1]
-
-Recu 2 (0)  -> 0 type: B packet: [0, 1]
-Send null
-
-Recu 0 (0)  -> 0 type: B packet: [0, 1]
-Send null
-
-Recu 1 (1)  -> 0 type: a packet: [0, 1]
-Send 0 (1)  -> 1 type: A packet: [0, 1]
-
-Recu 1 (0)  -> 0 type: A packet: [0, 1]
-Send null
-
-Recu 1 (0)  -> 0 type: B packet: [0, 1]
-Send null
-
-Recu 1 (1)  -> 0 type: b packet: [0, 1]
-Send 0 (1)  -> 1 type: B packet: [0, 1]
-
 Immediately stopping network packet processing.
 Writing output.
+10965 messages received
+waiting: 3460
+assimilate: 266
+13498 messages sent

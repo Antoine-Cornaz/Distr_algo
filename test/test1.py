@@ -15,7 +15,8 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 2
+NUMBER_MESSAGES = 100_000
+NUMBER_PROCESS = 9
 
 
 def main():
@@ -29,8 +30,7 @@ def main():
     print("start process")
 
     # Call teacher test
-    #subprocess.call(shlex.split('../tools/stress.py fifo -r RUNSCRIPT -l LOGSDIR -p 2 -m ' + str(NUMBER_MESSAGES)))
-    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p 3 -n 2 -v 22 -d 70'))
+    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p '+str(NUMBER_PROCESS)+' -n' + str(NUMBER_MESSAGES) + ' -v 3 -d 7'))
     #./stress.py agreement -r RUNSCRIPT -l LOGSDIR -p PROCESSES -n PROPOSALS -v PROPOSAL_MAX_VALUES -d PROPOSALS_DISTINCT_VALUES
 
     """RUNSCRIPT is the path to run.sh. Remember to build your project first!
@@ -42,24 +42,34 @@ def main():
 
 
     v = []
-    v.append(verify('01'))
-    v.append(verify('02'))
-    v.append(verify('03'))
+    for i in range(1, NUMBER_PROCESS+1):
+        v.append(verify('0'+str(i)))
 
-    assert len(v[0]) == len(v[1]) == len(v[2]) == 2
-    proposal_number = len(v[0])
+    for i in range(1, NUMBER_PROCESS+1):
+        with open('../prof_test/proc0'+str(i)+'.stderr', 'r') as file:
+            text = file.read()
+            if text != "":
+                print(text)
 
-    for i in range(proposal_number):
-        if not (v[0][i].issubset(v[1][i]) or (v[1][i].issubset(v[0][i]))):
-            print(f"ERROR, set {i} not super or subset for process 0, 1")
+    print(str(NUMBER_MESSAGES) + " Size:")
+    total = 0
+    for i in range(NUMBER_PROCESS):
+        print(len(v[i]), end=', ')
+        total += len(v[i])
+    print()
+    print("total", total)
 
-    for i in range(proposal_number):
-        if not (v[0][i].issubset(v[2][i]) or (v[2][i].issubset(v[0][i]))):
-            print(f"ERROR, set {i} not super or subset for process 0, 2")
+    for i in range(NUMBER_PROCESS):
+        if not (len(v[i]) == NUMBER_MESSAGES):
+            print("The file outputs doesn't have the same length as input ")
+            break
 
-    for i in range(proposal_number):
-        if not (v[1][i].issubset(v[2][i]) or (v[2][i].issubset(v[1][i]))):
-            print(f"ERROR, set {i} not super or subset for process 1, 2")
+
+    for i in range(NUMBER_PROCESS):
+        for j in range(i+1, NUMBER_PROCESS):
+            for k in range(min(len(v[i]), len(v[j]))):
+                if not (v[i][k].issubset(v[j][k]) or (v[j][k].issubset(v[i][k]))):
+                    print(f"ERROR, set {k} not super or subset for process {i}, {j}")
 
 
     print("Finish")
@@ -69,9 +79,8 @@ def main():
 
 def verify(number):
 
-    propositions = []
-    decisions = []
-
+    list_set_propositions = []
+    list_set_decision = []
 
     # Open the file in read mode
     line_number = -1
@@ -85,11 +94,11 @@ def verify(number):
 
             set_proposition = set()
             line_words = line.split()
-            for prop in line_words:
-                set_proposition.add(prop)
-            propositions.append(set_proposition)
+            for proposition in line_words:
+                set_proposition.add(proposition)
+            list_set_propositions.append(set_proposition)
 
-    print(number, "proposition", propositions)
+    #print(number, "proposition", propositions)
 
     # Open the file in read mode
     line_number = -1
@@ -100,16 +109,23 @@ def verify(number):
             line_words = line.split()
 
             set_decision = set()
-            for decis in line_words:
-                is_new = set_decision.add(decis)
-                if not is_new:
-                    print("ERROR not a set of decided value because 2 times same value", decis, number)
+            #print("line", line_words)
+            for decision in line_words:
+                if decision in set_decision:
+                    print("ERROR not a set of decided value because 2 times same value", decision, number)
+                else:
+                    set_decision.add(decision)
+            list_set_decision.append(set_decision)
 
 
-            if not set_proposition.issubset(set_decision):
-                print("ERROR decision is not subset of proposition", set_proposition not in set_decision, number)
+    for i in range(len(list_set_decision)):
+        if not list_set_propositions[i].issubset(list_set_decision[i]):
+            print()
+            print(f"ERROR file:{number} line {i}")
+            print("proposition " + str(list_set_propositions[i]))
+            print("decided " + str(list_set_decision[i]))
+            print("ERROR decision is not subset of proposition", str(list_set_propositions[i].difference(list_set_decision[i])))
 
-
-    return decisions
+    return list_set_decision
 
 main()

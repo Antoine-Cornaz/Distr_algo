@@ -9,125 +9,207 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Lattice {
 
-    private boolean end = false; // Flag to indicate the end of the agreement process.
+    private boolean end = false; // Indicates the end of the agreement process.
     private final int numberProcesses; // Total number of processes involved.
-    private boolean isOk = true; // Tracks if the current state of agreement is valid.
-    private int numberAnswer = 0; // Counter for the number of answers received in the current round.
-    private int runNumber = 0; // The current run or attempt number for agreement.
-    private final Set<Integer> proposal; // The set of proposed values.
-    private final Set<Integer> newProposition; // New values proposed by other processes.
+    private int receivedYes = 0; // Counter for answers received in the current round.
+    private int currentRun = 0; // Current round or attempt number.
+
+    private final Set<Integer> proposals; // Set of proposed values.
+    private final Set<Message> receivedMessages; // Tracks received messages to avoid duplicates.
+
     private final Lock lock; // Lock for ensuring thread safety.
-    private final MyWriter myWriter; // Writer to log or output results.
-    private final int shot; // Identifier for the current round of agreement.
+    //private final Lock lock2;
+    private final MyWriter myWriter; // Writer to log results.
+    private final int roundId; // Identifier for the current round of agreement.
+    private final MessageReceiver messageReceiver;
+    private final boolean[] peerAccepted;
+
 
     /**
      * Constructor to initialize the Lattice instance.
-     * @param proposal Initial set of proposals.
+     *
+     * @param proposals      Initial set of proposals.
      * @param numberProcesses Total number of processes.
-     * @param myWriter Writer instance for logging.
-     * @param shot Identifier for the current agreement process.
+     * @param myWriter       Writer instance for logging results.
+     * @param agreementId        Identifier for the agreement process round.
      */
-    public Lattice(Set<Integer> proposal, int numberProcesses, MyWriter myWriter, int shot) {
-        this.proposal = proposal;
+    public Lattice(Set<Integer> proposals, int numberProcesses, MyWriter myWriter, int agreementId) {
+        this.proposals = proposals;
         this.numberProcesses = numberProcesses;
-        this.newProposition = new HashSet<>();
+        this.receivedMessages = new HashSet<>();
         this.myWriter = myWriter;
-        this.shot = shot;
-        lock = new ReentrantLock();
+        this.roundId = agreementId;
+        this.lock = new ReentrantLock();
+        //this.lock2 = new ReentrantLock();
+        this.messageReceiver = new MessageReceiver();
+        peerAccepted = new boolean[numberProcesses];
     }
 
     /**
-     * Gets the latest proposition.
+     * Returns the current proposition.
+     *
      * @return The current proposition encapsulated in a Proposition object.
      */
     public Proposition getLatestProposition() {
-        lock.lock();
-        try {
-            return new Proposition(proposal, runNumber);
-        } finally {
-            lock.unlock();
+
+        //lock2.lock();
+        if(end){
+            //lock2.unlock();
+            return null;
         }
+        lock.lock();
+        Proposition proposition = new Proposition(new HashSet<>(proposals), currentRun);
+        lock.unlock();
+        //lock2.unlock();
+        return proposition;
+
+    }
+
+    public boolean[] getPeerAccepted() {
+        return peerAccepted.clone();
     }
 
     /**
-     * Handles the receipt of an answer message.
-     * @param message The received message containing proposals.
-     * @return True if the agreement process is successfully completed, otherwise false.
+     * Processes a received message.
+     *
+     * @param message The message to process.
+     * @return A list of messages as responses or null.
      */
-    public boolean receive(Message message) {
+    public List<Message> receive(Message message) {
 
-        switch (message.getType()) {
-            case 'A':
-                receiveA(message);
-                break;
-
-            case 'B':
-                receiveB(message);
-                break;
-
-            case 'C':
-                receiveC(message);
-                break;
-            case default:
-                System.err.println("message type weird " + message.getType());
+        //lock2.lock();
+        // Avoid processing duplicate messages.
+        if (!receivedMessages.add(message)){
+            //lock2.unlock();
+            return new ArrayList<>();
         }
 
+        // Join messages
+        message = messageReceiver.receive(message);
+        if (message == null) {
+            //lock2.unlock();
+            return new ArrayList<>();
+        }
 
-    }
-
-    private boolean receiveA(Message answer) {
-        // TODO
-        return false;
-    }
-
-    private boolean receiveB(Message answer) {
-        // TODO
-        lock.lock();
-        isOk = false;
         try {
-            for (Integer i : answer.getProposalValues()) {
-                newProposition.add(i);
-
+            switch (message.getType()) {
+                case 'A':
+                    return handleQuestionMessage(message);
+                case 'B':
+                    handleNoMessage(message);
+                    return new ArrayList<>();
+                case 'C':
+                    handleYesMessage(message);
+                    return new ArrayList<>();
+                default:
+                    System.err.println("Unknown message type: " + message.getType());
+                    return new ArrayList<>();
             }
-
-            if (answer.getAttemptNumber() == runNumber) {
-                numberAnswer++;
-            }
-
-            boolean majority = numberAnswer > numberProcesses / 2;
-            if (majority && isOk && !end) {
-                end = true;
-                myWriter.newDeliverMessage(shot, proposal);
-                return true;
-            }
-            return false;
-        } finally {
-            lock.unlock();
+        }finally {
+            //lock2.unlock();
         }
     }
 
     /**
-     * Handles the receipt of a question message and formulates an appropriate response.
+     * Handles a question ('A') message.
+     *
      * @param question The received question message.
      * @return A list of response messages.
      */
-    private List<Message> receiveC(Message question) {
+    private List<Message> handleQuestionMessage(Message question) {
+        List<Message> messages = new ArrayList<>(1);
         lock.lock();
-        try {
-            List<Message> answer = new ArrayList<>();
-            if (proposal.containsAll(question.getProposalValues())) {
-                // If the proposal is a subset of the question's proposal values.
-                answer.add(question.answerMessageYes());
-            } else {
-                // If the proposal is not a subset of the question's proposal values.
-                Set<Integer> difference = new HashSet<>(proposal);
-                difference.removeAll(question.getProposalValues());
-                List<Integer> differenceList = new ArrayList<>(difference);
-                answer = question.answerMessageNo(differenceList);
-            }
-            return answer;
-        } finally {
+        if (question.getProposalValues().containsAll(proposals)) {
+            messages.add(question.answerMessageYes());
+        } else {
+            List<Integer> missingProposals = new ArrayList<>(proposals);
+            missingProposals.removeAll(question.getProposalValues());
+            messages.addAll(question.answerMessageNo(missingProposals));
+        }
+        startNewRun(question.getProposalValues());
+        lock.unlock();
+        return messages;
+    }
+
+    /**
+     * Handles a NO ('B') message.
+     *
+     * @param message The received NO message.
+     */
+    private void handleNoMessage(Message message) {
+        if (end) return;
+
+        lock.lock();
+
+        Set<Integer> newValues = message.getProposalValues();
+        newValues.removeAll(proposals);
+
+        if (!newValues.isEmpty()) {
+            startNewRun(message.getProposalValues());
+        }
+
+        lock.unlock();
+    }
+
+    /**
+     * Handles a YES ('C') message.
+     *
+     * @param message The received YES message.
+     */
+    private void handleYesMessage(Message message) {
+
+        lock.lock();
+        if (end || message.getAttemptNumber() != currentRun) {
             lock.unlock();
+            return;
+        }
+
+        peerAccepted[message.getIdSender()] = true;
+        receivedYes++;
+
+        if (isMajorityReceived()) {
+            finalizeAgreement();
+        }
+        lock.unlock();
+    }
+
+    /**
+     * Checks if a majority of responses have been received.
+     *
+     * @return True if majority is reached, otherwise false.
+     */
+    private boolean isMajorityReceived() {
+        return receivedYes > numberProcesses / 2;
+    }
+
+    /**
+     * Starts a new agreement run by updating the proposal set.
+     */
+    private void startNewRun(Set<Integer> newValues) {
+        // Already in lock
+
+        if (proposals.containsAll(newValues)) return;
+
+        currentRun++;
+        receivedYes = 0;
+        proposals.addAll(newValues);
+
+        Arrays.fill(peerAccepted, false);
+    }
+
+    /**
+     * Finalizes the agreement process by delivering the result.
+     */
+    private void finalizeAgreement() {
+        // In a lock
+        //System.out.println("agreement : " + roundId + " " + Arrays.toString(peerAccepted));
+        end = true;
+        myWriter.newDeliverMessage(roundId, new HashSet<>(proposals));
+    }
+
+    public void close(){
+        if (!end){
+            //System.out.println(roundId + " not agreed " + Arrays.toString(peerAccepted));
         }
     }
 }

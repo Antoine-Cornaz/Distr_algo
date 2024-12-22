@@ -1,96 +1,91 @@
 package cs451;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
+
+import static cs451.Message.messageProposition;
 
 public class Manager {
 
-    private final int number_processes;
-    private final int self_process;
-    private final boolean[] processes_dead;
+    private Scanner scanner = null;
+    private MyWriter myWriter = null;
 
-    public Manager(int number_processes, int self_process){
-        this.number_processes = number_processes;
-        this.self_process = self_process;
+    private final int numberLattices;
+    private final int numberProcesses;
+    private final int maxProposition;
+    private final int distincElement;
+    private final Lattice[] lattices;
+    private final int idSelf;
+    public Manager(String config_file_path, String outputfileName, int idSelf, int numberProcesses){
+        File myObj = new File(config_file_path);
+        this.numberProcesses = numberProcesses;
+        try {
+             scanner = new Scanner(myObj);
+             myWriter = new MyWriter(outputfileName);
+        } catch (FileNotFoundException e) {
+            System.err.println("file not found " + config_file_path + " " + e);
+        }
 
-        processes_dead = new boolean[number_processes];
+        String[] firstLine = scanner.nextLine().split(" ");
+        numberLattices = Integer.parseInt(firstLine[0]);
+        maxProposition = Integer.parseInt(firstLine[1]);
+        System.out.println("number process " + numberProcesses);
+        distincElement = Integer.parseInt(firstLine[2]);
+        lattices = new Lattice[numberLattices];
+        for (int i = 0; i < numberLattices; i++) {
+            String proposal = scanner.nextLine();
+            lattices[i] = new Lattice(stringToSetInteger(proposal), numberProcesses, myWriter, i);
+        }
+
+        this.idSelf = idSelf;
     }
 
-    public void setAlive(List<Integer> list_processes_number){
-        for (int process_number: list_processes_number){
-            setAlive(process_number);
-        }
-    }
+    public List<Message> getMessages(){
 
-    public void setAlive(int process_number){
-        assert process_number != self_process;
-        assert process_number < number_processes;
-        processes_dead[process_number] = false;
-    }
+        List<Message> messages = new ArrayList<>();
 
-    public void setDead(List<Integer> list_processes_number){
-        for (Integer process_number: list_processes_number){
-            setDead(process_number);
-        }
-    }
+        for (int i = 0; i < numberLattices; i++) {
+            Proposition proposition = lattices[i].getLatestProposition();
+            if (proposition == null) continue;
+            boolean[] listAccepted = lattices[i].getPeerAccepted();
 
-    public void setDead(int process_number){
-        assert process_number != self_process;
-        assert process_number < number_processes;
-        processes_dead[process_number] = true;
-    }
-
-    public List<Integer> get_manage(){
-        ArrayList<Integer> list = new ArrayList<>();
-
-        int i = (self_process+1) % number_processes;
-        while (processes_dead[i]){
-            list.add(i);
-            i = (i+1) % number_processes;
+            for (int j = 0; j < numberProcesses; j++) {
+                if(!listAccepted[j]){
+                    messages.addAll(messageProposition(i, j, idSelf, proposition.getAttemptNumber(), proposition.getProposal(), 'A'));
+                }
+            }
+            if (messages.size() > 100) break;
         }
 
-        return list;
+
+        return messages;
+    }
+
+    public List<Message> receive(Message message){
+        //System.out.println("Manager " + message);
+        if (! (0 <=message.getShotId() && message.getShotId() < numberLattices)){
+            System.err.println("Receive message with shot id outside possible ids");
+        }
+        return lattices[message.getShotId()].receive(message);
     }
 
 
-    /*
-    public static void main (String[] args) throws InterruptedException {
-        Manager manager = new Manager(60, 28);
+    private Set<Integer> stringToSetInteger(String line){
+        String[] values = line.split(" ");
+        Set<Integer> set = new HashSet<>();
 
-        for (Integer a : manager.get_manage()){
-            System.out.println("manage " + a);
+        for (String s: values){
+            set.add(Integer.parseInt(s));
         }
 
-        System.out.println("kill 29 to 52");
-        for (int i = 28; i < 53; i++) {
-            manager.setDead(i);
-        }
-
-        for (Integer a : manager.get_manage()){
-            System.out.println("manage " + a);
-        }
-
-        System.out.println("resurect process 42");
-        manager.setAlive(42);
-
-        for (Integer a : manager.get_manage()){
-            System.out.println("manage " + a);
-        }
-
-        System.out.println("kill all excpet self(28) and 20");
-
-
-        for (int i = 0; i < 60; i++) {
-            if(i == 28 || i == 20) continue;
-            manager.setDead(i);
-        }
-
-
-        for (Integer a : manager.get_manage()){
-            System.out.println("manage " + a);
-        }
-
+        return set;
     }
-     */
 
+    public void close(){
+        myWriter.close();
+        for (int i = 0; i < numberLattices; i++) {
+            lattices[i].close();
+        }
+    }
 }

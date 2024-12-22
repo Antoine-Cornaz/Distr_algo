@@ -3,9 +3,7 @@ package cs451;
 import java.util.List;
 import java.lang.System;
 
-import static cs451.Constants.INITIAL_PING_TIME_MS;
 
-/*
 public class Main {
 
     static Receiver receiver;
@@ -21,11 +19,9 @@ public class Main {
         //write/flush output file if necessary
         System.out.println("Writing output.");
 
-        //finish the program when asked to finish
-        if(receiver != null) {
+        if(receiver != null){
             receiver.close();
         }
-
 
         if(sender != null){
             sender.close();
@@ -105,24 +101,13 @@ public class Main {
             list_ports[i] = hosts.get(i).getPort();
             list_ip[i] = hosts.get(i).getIp();
         }
-        MyWriter myWriter = new MyWriter(parser.output());
 
         int self_id = parser.myId()-1;
-        int number_message = parser.getNumberMessage();
-        Messager messager = new Messager(numberProcess, self_id, number_message, myWriter);
-        Detector detector = new Detector(numberProcess, self_id, INITIAL_PING_TIME_MS);
-        String fileName = parser.output();
 
-        sender = new Sender(
-                list_ports,
-                list_ip,
-                self_id,
-                messager,
-                detector
-        );
+        Manager manager = new Manager(parser.config(), parser.output(), self_id, numberProcess);
 
-        receiver = new Receiver(fileName, list_ports, self_id, messager, detector);
+        sender = new Sender(list_ports, list_ip, manager);
+
+        receiver = new Receiver(list_ports, self_id, manager);
     }
 }
-
- */

@@ -22,11 +22,6 @@ public class Detector {
 
     public Detector(int number_process, int self_process, long ping_time_ms){
 
-        assert 0 < number_process;
-        assert 0 <= self_process;
-        assert self_process < number_process;
-
-        assert 0 < ping_time_ms;
 
         this.number_process = number_process;
         this.self_process = self_process;

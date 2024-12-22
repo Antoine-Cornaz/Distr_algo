@@ -8,61 +8,67 @@ import java.util.*;
 public class MyWriter {
 
     private final Writer writer;
-    private final Set<MessageObject> messageGot;
+    private final Map<Integer, Set<Integer>> messageGot;
+    private int messageToWrite = 0;
 
     public MyWriter(String fileName){
         try {
             writer = new FileWriter(fileName);
         } catch (IOException e) {
-            System.err.println("Messager, filename incorrect " + e);
+            System.err.println("MyWriter, filename incorrect: " + e);
             throw new RuntimeException(e);
         }
 
-        messageGot = new HashSet<>();
+        messageGot = new HashMap<>();
     }
 
-    // Got a new message, mo.id == -1 if broadcast
-    public void newDeliverMessage(int shot, Set<Integer> decision){
-        MessageObject mo = new MessageObject(shot, decision);
-        boolean isNew = messageGot.add(mo);
-
-        if (isNew){
-            if (mo.getShot() == 0){
-                writeDeliver(mo);
-            }else {
-                MessageObject previous_message = new MessageObject(shot-1, Set.of());
-                if (messageGot.contains(previous_message)){
-                    writeDeliver(mo);
-                }
-            }
+    public synchronized void newDeliverMessage(int shot, Set<Integer> decision){
+        if (shot < messageToWrite){
+            System.err.println("ERROR writing value 2 times");
+        }
+        messageGot.put(shot, decision);
+        while (messageGot.containsKey(messageToWrite)){
+            writeDeliver();
         }
     }
 
-    private void writeDeliver(MessageObject mo){
+    private void writeDeliver(){
+        Set<Integer> decision = messageGot.get(messageToWrite);
+        if (decision == null) {
+            System.err.println("No decision found for shot: " + messageToWrite);
+            return;
+        }
+
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mo.getDecision().size(); i++) {
+        Iterator<Integer> it = decision.iterator();
+        for (int i = 0; i < decision.size(); i++) {
             if (i > 0) {
                 sb.append(" ");
             }
-            sb.append(mo.getDecision().iterator().next());
+            sb.append(it.next());
         }
-
+        sb.append("\n");
 
         String message = sb.toString();
         try {
+            //System.out.println("Writing " + messageToWrite);
             writer.write(message);
+            writer.flush(); // Ensure data is written to disk
+            //System.out.println("Written shot " + messageToWrite + ": " + message.trim());
         } catch (IOException e) {
-            System.err.println(e);
+            System.err.println("Failed to write message for shot " + messageToWrite + ": " + e.getMessage());
         }
+
+        messageGot.remove(messageToWrite);
+        messageToWrite++;
     }
 
-    public void close(){
+    public synchronized void close(){
         try {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Failed to close MyWriter: " + e.getMessage());
         }
-
     }
 }
