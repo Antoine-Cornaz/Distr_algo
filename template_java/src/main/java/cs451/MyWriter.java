@@ -51,7 +51,7 @@ public class MyWriter {
 
         String message = sb.toString();
         try {
-            //System.out.println("Writing " + messageToWrite);
+            System.out.println("Writing a " + message);
             writer.write(message);
             writer.flush(); // Ensure data is written to disk
             //System.out.println("Written shot " + messageToWrite + ": " + message.trim());

@@ -45,6 +45,7 @@ public class MessageReceiver {
      */
     public Message receive(Message message) {
         numberMessageReceived++;
+        if (message.getTotalParts() == 1) return message;
         String messageKey = generateMessageKey(message);
 
         // Retrieve or initialize the MessagePart entry
@@ -54,19 +55,24 @@ public class MessageReceiver {
         // Add the part to the message
         messagePart.addPart(message);
 
+        Message completeMessage = null;
+
         // Check if the message is complete
         if (messagePart.isComplete()) {
             // Assemble the complete message
-            Message completeMessage = messagePart.assembleCompleteMessage();
+            completeMessage = messagePart.assembleCompleteMessage();
 
             // Remove from progress map as it's completed
             messagesInProgress.remove(messageKey);
-
-
-            return completeMessage;
+            //System.out.println(message.getTotalParts() + " parts, Complete message " + completeMessage);
         }
 
-        return null;
+        if (messagesInProgress.size() > 10_000){
+            messagesInProgress.clear();
+            System.out.println("Clear cache MessageReceiver");
+        }
+
+        return completeMessage;
     }
 
     /**
@@ -77,6 +83,7 @@ public class MessageReceiver {
      */
     private String generateMessageKey(Message message) {
         return message.getShotId() + "-" + message.getIdSender() + "-" + message.getAttemptNumber() + "-" + message.getType();
+        //int shotId, int idDestination, int idSender, int attemptNumber, Set<Integer> proposalValues, int partNumber, int totalParts, char type
     }
 
     /*

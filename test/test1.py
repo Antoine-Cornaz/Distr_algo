@@ -15,7 +15,7 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 100_000
+NUMBER_MESSAGES = 100
 NUMBER_PROCESS = 9
 
 
@@ -30,7 +30,7 @@ def main():
     print("start process")
 
     # Call teacher test
-    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p '+str(NUMBER_PROCESS)+' -n' + str(NUMBER_MESSAGES) + ' -v 3 -d 7'))
+    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p '+str(NUMBER_PROCESS)+' -n' + str(NUMBER_MESSAGES) + ' -v 100 -d 305'))
     #./stress.py agreement -r RUNSCRIPT -l LOGSDIR -p PROCESSES -n PROPOSALS -v PROPOSAL_MAX_VALUES -d PROPOSALS_DISTINCT_VALUES
 
     """RUNSCRIPT is the path to run.sh. Remember to build your project first!
@@ -42,8 +42,13 @@ def main():
 
 
     v = []
+    input = readInput('01')
     for i in range(1, NUMBER_PROCESS+1):
         v.append(verify('0'+str(i)))
+        input2 = readInput('0'+str(i))
+        for j in range(len(input)):
+            input[j].update(input2[j])
+
 
     for i in range(1, NUMBER_PROCESS+1):
         with open('../prof_test/proc0'+str(i)+'.stderr', 'r') as file:
@@ -64,6 +69,10 @@ def main():
             print("The file outputs doesn't have the same length as input ")
             break
 
+    for j in range(NUMBER_PROCESS):
+        for i in range(min(NUMBER_MESSAGES, len(v[j]))):
+            if not v[j][i].issubset(input[i]):
+                print(f"Error output value not from input proposition {i}, {j}, \n{v[i][j]}, \n{input[i]}")
 
     for i in range(NUMBER_PROCESS):
         for j in range(i+1, NUMBER_PROCESS):
@@ -79,26 +88,8 @@ def main():
 
 def verify(number):
 
-    list_set_propositions = []
+    list_set_propositions = readInput(number)
     list_set_decision = []
-
-    # Open the file in read mode
-    line_number = -1
-    with open('../prof_test/proc' + number + '.config', 'r') as file:
-        # Read each line in the file
-        for line in file:
-            line_number += 1
-            #Don't check first line because config.
-            if line_number == 0:
-                continue
-
-            set_proposition = set()
-            line_words = line.split()
-            for proposition in line_words:
-                set_proposition.add(proposition)
-            list_set_propositions.append(set_proposition)
-
-    #print(number, "proposition", propositions)
 
     # Open the file in read mode
     line_number = -1
@@ -127,5 +118,26 @@ def verify(number):
             print("ERROR decision is not subset of proposition", str(list_set_propositions[i].difference(list_set_decision[i])))
 
     return list_set_decision
+
+def readInput(number):
+    list_set_propositions = []
+
+    # Open the file in read mode
+    line_number = -1
+    with open('../prof_test/proc' + number + '.config', 'r') as file:
+        # Read each line in the file
+        for line in file:
+            line_number += 1
+            #Don't check first line because config.
+            if line_number == 0:
+                continue
+
+            set_proposition = set()
+            line_words = line.split()
+            for proposition in line_words:
+                set_proposition.add(proposition)
+            list_set_propositions.append(set_proposition)
+
+    return list_set_propositions
 
 main()

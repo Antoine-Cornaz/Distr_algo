@@ -22,10 +22,6 @@ public class Udp_receiver extends Thread {
     private final DatagramSocket socket;
     private final byte[] buf = new byte[MAX_SIZE_MESSAGE];
     private DatagramPacket packet;
-    private int messageReceived = 0;
-    private long time1 = -1;
-    private long timeAssimilate = 0;
-    private long timeWaiting = 0;
 
 
     public Udp_receiver(int port)  {
@@ -42,10 +38,6 @@ public class Udp_receiver extends Thread {
 
         // Clear the buf.
         Arrays.fill(buf, (byte) NO_CHAR);
-        if(time1 == -1) time1 = System.currentTimeMillis();
-
-        timeAssimilate += (System.currentTimeMillis() - time1);
-        time1 = System.currentTimeMillis();
 
         packet = new DatagramPacket(buf, buf.length);
         try {
@@ -54,10 +46,6 @@ public class Udp_receiver extends Thread {
             System.err.println("Exception in udp_receiver, listen 1: " + e.getMessage());
             return "";
         }
-        timeWaiting += (System.currentTimeMillis() - time1);
-        time1 = System.currentTimeMillis();
-
-        messageReceived++;
 
         InetAddress address = packet.getAddress();
         int port = packet.getPort();
@@ -84,9 +72,6 @@ public class Udp_receiver extends Thread {
     }
 
     public void close(){
-        System.out.println(messageReceived + " messages received");
-        System.out.println("waiting: " + timeWaiting);
-        System.out.println("assimilate: " + timeAssimilate);
         socket.close();
     }
 }

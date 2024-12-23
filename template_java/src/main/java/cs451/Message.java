@@ -29,24 +29,30 @@ public class Message {
 
     // Updated messageProposition to include shotId
     public static List<Message> messageProposition(int shotId, int idDestination, int idSender, int attemptNumber, Set<Integer> proposalValues, char type) {
-        int maxPayloadSize = 500 - 32 - 14 - 20; // 500 bytes minus header size
+        int maxPayloadSize = 500 - 32 - 14 - 50; // 500 bytes minus header size
         List<Message> messages = new ArrayList<>();
         List<Integer> proposalList = new ArrayList<>(proposalValues);
 
 
 
-        // Assuming each integer takes 4 bytes
-        int totalParts = (int) Math.ceil((double) proposalList.size() * 4 / maxPayloadSize);
-        totalParts = totalParts == 0 ? 1 : totalParts; // Ensure at least one part
+        // Assuming each integer takes 16 bytes
+        int totalParts = (int) Math.ceil((double) proposalList.size() * 16 / maxPayloadSize);
+        totalParts = totalParts <= 0 ? 1 : totalParts; // Ensure at least one part
 
         for (int i = 0; i < totalParts; i++) {
             Set<Integer> partProposal = new HashSet<>();
-            int start = i * maxPayloadSize / 4;
-            int end = Math.min(proposalList.size(), (i + 1) * maxPayloadSize / 4);
+            int start = i * maxPayloadSize / 16;
+            int end = Math.min(proposalList.size(), (i + 1) * maxPayloadSize / 16);
             for (int j = start; j < end; j++) {
                 partProposal.add(proposalList.get(j));
             }
-            messages.add(new Message(shotId, idDestination, idSender, attemptNumber, partProposal, i + 1, totalParts, type));
+            Message newMessage = new Message(shotId, idDestination, idSender, attemptNumber, partProposal, i + 1, totalParts, type);
+            if (newMessage.toContent().getBytes().length > 500){
+                System.err.println("ERROR Message too big");
+                throw new RuntimeException();
+            }else{
+                messages.add(newMessage);
+            }
         }
         return messages;
     }
@@ -54,12 +60,24 @@ public class Message {
     // Answer message "NO" with missing values
     public List<Message> answerMessageNo(List<Integer> missingValues) {
         Set<Integer> missingSet = new HashSet<>(missingValues);
-        return messageProposition(this.shotId, idSender, idDestination, attemptNumber, missingSet, 'B');
+        List<Message> messages = messageProposition(this.shotId, idSender, idDestination, attemptNumber, missingSet, 'B');
+        for (Message m: messages){
+            if (!Message.fromString(m.toContent()).equals(m)){
+                System.err.println("Answer no wrong");
+                throw new RuntimeException();
+            }
+        }
+        return messages;
     }
 
     // Answer message "YES"
     public Message answerMessageYes() {
-        return new Message(shotId, idSender, idDestination, attemptNumber, proposalValues, partNumber, totalParts, 'C');
+        Message answer = new Message(shotId, idSender, idDestination, attemptNumber, proposalValues, partNumber, totalParts, 'C');
+        if (!Message.fromString(answer.toContent()).equals(answer)){
+            System.err.println("Answer yes wrong");
+            throw new RuntimeException();
+        }
+        return answer;
     }
 
     // Serialize Message to content string
@@ -206,7 +224,8 @@ public class Message {
 
         // For simplicity, we'll create a single part message. Adjust if multiple parts are needed.
         // Here, we'll assume that after joining, the combined message fits into one part.
-        return new Message(
+
+        Message message = new Message(
                 first.shotId,
                 first.idDestination,
                 first.idSender,
@@ -214,8 +233,14 @@ public class Message {
                 combinedProposalValues,
                 1,
                 totalParts,
-                first.type
-        );
+                first.type);
+
+        if (!Message.fromString(message.toContent()).equals(message)){
+            System.err.println("Answer yes wrong");
+            throw new RuntimeException();
+        }
+
+        return message;
     }
 
     public static void main(String[] args) throws Exception{

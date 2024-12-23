@@ -34,7 +34,6 @@ public class Receiver extends Thread{
             List<Message> answers = manager.receive(message);
 
 
-
             //System.out.println("Send " + (answers.isEmpty() ? "null" : answers.get(0)));
             //System.out.println();
 

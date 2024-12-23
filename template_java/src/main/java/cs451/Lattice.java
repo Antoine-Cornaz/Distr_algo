@@ -1,6 +1,7 @@
 package cs451;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,7 +19,6 @@ public class Lattice {
     private final Set<Message> receivedMessages; // Tracks received messages to avoid duplicates.
 
     private final Lock lock; // Lock for ensuring thread safety.
-    //private final Lock lock2;
     private final MyWriter myWriter; // Writer to log results.
     private final int roundId; // Identifier for the current round of agreement.
     private final MessageReceiver messageReceiver;
@@ -40,7 +40,6 @@ public class Lattice {
         this.myWriter = myWriter;
         this.roundId = agreementId;
         this.lock = new ReentrantLock();
-        //this.lock2 = new ReentrantLock();
         this.messageReceiver = new MessageReceiver();
         peerAccepted = new boolean[numberProcesses];
     }
@@ -52,21 +51,18 @@ public class Lattice {
      */
     public Proposition getLatestProposition() {
 
-        //lock2.lock();
         if(end){
-            //lock2.unlock();
             return null;
         }
         lock.lock();
         Proposition proposition = new Proposition(new HashSet<>(proposals), currentRun);
         lock.unlock();
-        //lock2.unlock();
         return proposition;
 
     }
 
     public boolean[] getPeerAccepted() {
-        return peerAccepted.clone();
+        return peerAccepted;
     }
 
     /**
@@ -77,36 +73,33 @@ public class Lattice {
      */
     public List<Message> receive(Message message) {
 
-        //lock2.lock();
+        if (message.getShotId() != roundId){
+            System.err.println("Error received Message wrong lattice");
+        }
+
         // Avoid processing duplicate messages.
         if (!receivedMessages.add(message)){
-            //lock2.unlock();
             return new ArrayList<>();
         }
 
         // Join messages
         message = messageReceiver.receive(message);
         if (message == null) {
-            //lock2.unlock();
             return new ArrayList<>();
         }
 
-        try {
-            switch (message.getType()) {
-                case 'A':
-                    return handleQuestionMessage(message);
-                case 'B':
-                    handleNoMessage(message);
-                    return new ArrayList<>();
-                case 'C':
-                    handleYesMessage(message);
-                    return new ArrayList<>();
-                default:
-                    System.err.println("Unknown message type: " + message.getType());
-                    return new ArrayList<>();
-            }
-        }finally {
-            //lock2.unlock();
+        switch (message.getType()) {
+            case 'A':
+                return handleQuestionMessage(message);
+            case 'B':
+                handleNoMessage(message);
+                return new ArrayList<>();
+            case 'C':
+                handleYesMessage(message);
+                return new ArrayList<>();
+            default:
+                System.err.println("Unknown message type: " + message.getType());
+                return new ArrayList<>();
         }
     }
 
@@ -137,9 +130,11 @@ public class Lattice {
      * @param message The received NO message.
      */
     private void handleNoMessage(Message message) {
+
         if (end) return;
 
         lock.lock();
+        System.out.println("No");
 
         Set<Integer> newValues = message.getProposalValues();
         newValues.removeAll(proposals);
@@ -163,6 +158,7 @@ public class Lattice {
             lock.unlock();
             return;
         }
+        System.out.println("Yes");
 
         peerAccepted[message.getIdSender()] = true;
         receivedYes++;
@@ -194,6 +190,8 @@ public class Lattice {
         receivedYes = 0;
         proposals.addAll(newValues);
 
+        System.out.println(proposals.size() + " new run" + proposals);
+
         Arrays.fill(peerAccepted, false);
     }
 
@@ -205,11 +203,5 @@ public class Lattice {
         //System.out.println("agreement : " + roundId + " " + Arrays.toString(peerAccepted));
         end = true;
         myWriter.newDeliverMessage(roundId, new HashSet<>(proposals));
-    }
-
-    public void close(){
-        if (!end){
-            //System.out.println(roundId + " not agreed " + Arrays.toString(peerAccepted));
-        }
     }
 }

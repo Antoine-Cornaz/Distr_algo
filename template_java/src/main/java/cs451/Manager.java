@@ -84,8 +84,5 @@ public class Manager {
 
     public void close(){
         myWriter.close();
-        for (int i = 0; i < numberLattices; i++) {
-            lattices[i].close();
-        }
     }
 }

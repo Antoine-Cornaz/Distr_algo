@@ -29,7 +29,7 @@ public class Constants {
 
     public static final char NO_CHAR = ' ';
 
-    public static final int MAX_SIZE_MESSAGE = 128;
+    public static final int MAX_SIZE_MESSAGE = 512;
 
     public static final int BATCH_SIZE = 800;
 
