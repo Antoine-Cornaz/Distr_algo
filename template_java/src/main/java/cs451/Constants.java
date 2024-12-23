@@ -24,16 +24,8 @@ public class Constants {
     // Time out in ms
     public static final int MAX_TIME_OUT_MS = 20;
 
-    public static final String SEPARATOR = ",";
-    public static final char SEPARATOR_C = ',';
 
     public static final char NO_CHAR = ' ';
 
     public static final int MAX_SIZE_MESSAGE = 512;
-
-    public static final int BATCH_SIZE = 800;
-
-    public static final int INITIAL_PING_TIME_MS = 5_000;
-
-    public static final long START_SHIFT_TIME_MILLIS = 3_000L;
 }

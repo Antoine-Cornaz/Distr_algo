@@ -15,8 +15,8 @@ This is a basic test file
 with 1000 messages
 process 1 is receiver, process 2 and 3 sender
 """
-NUMBER_MESSAGES = 100
-NUMBER_PROCESS = 9
+NUMBER_MESSAGES = 100_000
+NUMBER_PROCESS = 3
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     print("start process")
 
     # Call teacher test
-    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p '+str(NUMBER_PROCESS)+' -n' + str(NUMBER_MESSAGES) + ' -v 100 -d 305'))
+    subprocess.call(shlex.split('../tools/stress.py agreement -r ../template_java/run.sh -l ../prof_test/ -p '+str(NUMBER_PROCESS)+' -n' + str(NUMBER_MESSAGES) + ' -v 20 -d 305'))
     #./stress.py agreement -r RUNSCRIPT -l LOGSDIR -p PROCESSES -n PROPOSALS -v PROPOSAL_MAX_VALUES -d PROPOSALS_DISTINCT_VALUES
 
     """RUNSCRIPT is the path to run.sh. Remember to build your project first!

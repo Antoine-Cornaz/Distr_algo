@@ -44,20 +44,17 @@ public class Sender extends Thread {
             List<Message> messages = manager.getMessages();
             for (Message m : messages) {
                 String msg = m.toContent();
-                if(m.getIdDestination() >= list_ip.length){
-                    System.err.println("Problem sender " + m.getIdDestination() + " " + list_ip.length);
-                    System.err.println(m);
-                }
-                System.out.println("set " + m.getProposalValues() + " type " + m.getType());
+
+                //System.out.println("set " + m.getProposalValues() + " type " + m.getType());
                 String ip = list_ip[m.getIdDestination()];
                 int port = list_port[m.getIdDestination()];
-                System.out.println("Send " + messages);
+                //System.out.println("Send " + messages);
                 udpSender.send(msg, ip, port);
             }
 
             //Thread.yield();
             try {
-                TimeUnit.MILLISECONDS.sleep(1000);
+                TimeUnit.MILLISECONDS.sleep(10);
             } catch (InterruptedException ignore) {}
 
         }

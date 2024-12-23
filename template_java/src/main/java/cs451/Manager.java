@@ -30,7 +30,7 @@ public class Manager {
         String[] firstLine = scanner.nextLine().split(" ");
         numberLattices = Integer.parseInt(firstLine[0]);
         maxProposition = Integer.parseInt(firstLine[1]);
-        System.out.println("number process " + numberProcesses);
+        //System.out.println("number process " + numberProcesses);
         distincElement = Integer.parseInt(firstLine[2]);
         lattices = new Lattice[numberLattices];
         for (int i = 0; i < numberLattices; i++) {

@@ -134,7 +134,7 @@ public class Lattice {
         if (end) return;
 
         lock.lock();
-        System.out.println("No");
+        //System.out.println("No");
 
         Set<Integer> newValues = message.getProposalValues();
         newValues.removeAll(proposals);
@@ -158,7 +158,7 @@ public class Lattice {
             lock.unlock();
             return;
         }
-        System.out.println("Yes");
+        //System.out.println("Yes");
 
         peerAccepted[message.getIdSender()] = true;
         receivedYes++;
@@ -190,7 +190,7 @@ public class Lattice {
         receivedYes = 0;
         proposals.addAll(newValues);
 
-        System.out.println(proposals.size() + " new run" + proposals);
+        //System.out.println(proposals.size() + " new run" + proposals);
 
         Arrays.fill(peerAccepted, false);
     }

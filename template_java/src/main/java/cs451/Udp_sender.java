@@ -2,10 +2,6 @@ package cs451;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
-
-import static cs451.Constants.MAX_TIME_OUT_MS;
-import static cs451.Constants.NO_CHAR;
 
 /*
 I use this udp packet example

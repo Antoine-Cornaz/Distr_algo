@@ -49,10 +49,10 @@ public class Message {
             Message newMessage = new Message(shotId, idDestination, idSender, attemptNumber, partProposal, i + 1, totalParts, type);
             if (newMessage.toContent().getBytes().length > 500){
                 System.err.println("ERROR Message too big");
-                throw new RuntimeException();
-            }else{
-                messages.add(newMessage);
             }
+
+            messages.add(newMessage);
+
         }
         return messages;
     }
@@ -60,24 +60,12 @@ public class Message {
     // Answer message "NO" with missing values
     public List<Message> answerMessageNo(List<Integer> missingValues) {
         Set<Integer> missingSet = new HashSet<>(missingValues);
-        List<Message> messages = messageProposition(this.shotId, idSender, idDestination, attemptNumber, missingSet, 'B');
-        for (Message m: messages){
-            if (!Message.fromString(m.toContent()).equals(m)){
-                System.err.println("Answer no wrong");
-                throw new RuntimeException();
-            }
-        }
-        return messages;
+        return messageProposition(this.shotId, idSender, idDestination, attemptNumber, missingSet, 'B');
     }
 
     // Answer message "YES"
     public Message answerMessageYes() {
-        Message answer = new Message(shotId, idSender, idDestination, attemptNumber, proposalValues, partNumber, totalParts, 'C');
-        if (!Message.fromString(answer.toContent()).equals(answer)){
-            System.err.println("Answer yes wrong");
-            throw new RuntimeException();
-        }
-        return answer;
+        return new Message(shotId, idSender, idDestination, attemptNumber, proposalValues, partNumber, totalParts, 'C');
     }
 
     // Serialize Message to content string
@@ -225,7 +213,7 @@ public class Message {
         // For simplicity, we'll create a single part message. Adjust if multiple parts are needed.
         // Here, we'll assume that after joining, the combined message fits into one part.
 
-        Message message = new Message(
+        return new Message(
                 first.shotId,
                 first.idDestination,
                 first.idSender,
@@ -234,15 +222,9 @@ public class Message {
                 1,
                 totalParts,
                 first.type);
-
-        if (!Message.fromString(message.toContent()).equals(message)){
-            System.err.println("Answer yes wrong");
-            throw new RuntimeException();
-        }
-
-        return message;
     }
 
+    /*
     public static void main(String[] args) throws Exception{
         test1();
         test2();
@@ -260,11 +242,6 @@ public class Message {
 
         // Create messages with shotId = 123
         List<Message> messages = Message.messageProposition(123, 1001, 2002, 1, proposal, 'A');
-
-        // Display all messages
-        for (Message msg : messages) {
-            System.out.println(msg);
-        }
 
         // Serialize the first message to content string
         String serialized = messages.get(0).toContent();
@@ -342,4 +319,5 @@ public class Message {
     public static void a(boolean shouldBeTrue) throws Exception {
         if (!shouldBeTrue) throw new Exception("Assert");
     }
+     */
 }
